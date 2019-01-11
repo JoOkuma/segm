@@ -52,12 +52,12 @@ namespace segm {
         int h; /* h */
         int w; /* w */
         int b; /* bands */
-        T *feat;
+        T *feat = nullptr;
 
         /* lookup table */
-        int *row; /* w plus band length padding */
-        int *col; /* band padding only */
-        int *row_index; /* w padding only */
+        int *row = nullptr; /* w plus band length padding */
+        int *col = nullptr; /* band padding only */
+        int *row_index = nullptr; /* w padding only */
     };
 
     template<typename T>
@@ -149,7 +149,7 @@ namespace segm {
     };
 
     template<typename T>
-    T Image<T>::squaredl2norm(int x1, int y1, int x2, int y2) {
+    inline T Image<T>::squaredl2norm(int x1, int y1, int x2, int y2) {
         T dist = 0;
         T *v1 = getFeat(x1, y1);
         T *v2 = getFeat(x2, y2);
