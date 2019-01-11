@@ -45,3 +45,4 @@ CTestTestfile.cmake
 
 # CLion
 .idea
+cmake-build-debug
