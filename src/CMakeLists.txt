@@ -3,6 +3,10 @@ set(SOURCE_FILES
         datatypes/image.h
         datatypes/heap.cpp
         datatypes/heap.h
+        datatypes/matrix.cpp
+        datatypes/matrix.h
+        metriclearn/largemargin.cpp
+        metriclearn/largemargin.h
         segmentation/watercut.cpp
         segmentation/watercut.h)
 
