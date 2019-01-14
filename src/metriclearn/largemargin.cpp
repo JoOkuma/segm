@@ -109,6 +109,8 @@ void LargeMargin::allocAuxiliary()
     next_Ldata = new Matrix<float>(size, d);
 
     gradient = new Matrix<float>(d, d);
+    grad_prod = new Matrix<float>(d, d);
+
     target = new Matrix<int>(size, k_targets);
     target_grad = new Matrix<float>(d, d);
 
@@ -126,6 +128,8 @@ void LargeMargin::freeAuxiliary()
     delete next_Ldata;
 
     delete gradient;
+    delete grad_prod;
+
     delete target;
     delete target_grad;
 
@@ -410,8 +414,9 @@ void LargeMargin::updateTransform()
 {
     computeJointGrad();
 
+    L->mult(*gradient, *grad_prod);
     for (int i = 0; i < d * d; i++) {
-        (*next_L)(i) = (*L)(i) - 2 * current_learn_rate * (*gradient)(i);
+        (*next_L)(i) = (*L)(i) - 2 * current_learn_rate * (*grad_prod)(i);
     }
 }
 

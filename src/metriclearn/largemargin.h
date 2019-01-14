@@ -81,6 +81,7 @@ namespace segm
         Matrix<float> *next_imp_grad = nullptr;
 
         Matrix<float> *gradient = nullptr;
+        Matrix<float> *grad_prod = nullptr;
 
         int size;
         int d;
