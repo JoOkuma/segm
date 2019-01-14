@@ -2,6 +2,8 @@ add_executable(main_test
         test.cpp
         datatypes/heaptest.cpp
         datatypes/heaptest.h
+        metriclearn/largemargintest.cpp
+        metriclearn/largemargintest.h
         segmentation/watercuttest.cpp
         segmentation/watercuttest.h)
 

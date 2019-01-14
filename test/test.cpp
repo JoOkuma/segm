@@ -1,8 +1,10 @@
 #include "datatypes/heaptest.h"
+#include "metriclearn/largemargintest.h"
 #include "segmentation/watercuttest.h"
 
-int main(int argc, char *argv[])
+int main(void)
 {
     heap_test();
+    largemargin_test();
     watercut_test();
 }
