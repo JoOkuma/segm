@@ -1,6 +1,3 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
 #ifndef SEGM_SEGMIMAGE_H
 #define SEGM_SEGMIMAGE_H
@@ -48,6 +45,8 @@ namespace segm {
 
         bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
 
+        Image<T> copy() const ;
+
     protected:
         int h; /* h */
         int w; /* w */
@@ -66,7 +65,7 @@ namespace segm {
         h = height;
         b = 1;
 
-        feat = new T[w * h];
+        feat = new T[w * h]();
         row = new int[h];
         row_index = new int[h];
         col = new int[w];
@@ -84,7 +83,7 @@ namespace segm {
         h = height;
         b = bands;
 
-        feat = new T[w * h * b];
+        feat = new T[w * h * b]();
         row = new int[h];
         row_index = new int[h];
         col = new int[w];
@@ -142,10 +141,10 @@ namespace segm {
 
     template<typename T>
     Image<T>::~Image() {
-        delete feat;
-        delete row;
-        delete col;
-        delete row_index;
+        delete[] feat;
+        delete[] row;
+        delete[] col;
+        delete[] row_index;
     };
 
     template<typename T>
@@ -160,6 +159,15 @@ namespace segm {
         }
 
         return dist;
+    }
+
+    template <typename T>
+    Image<T> Image<T>::copy() const {
+        Image<T> out(w, h);
+        for (int i = 0; i < w * h; i++) {
+            out(i) = feat[i];
+        }
+        return out;
     }
 
 }

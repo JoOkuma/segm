@@ -35,7 +35,7 @@ namespace segm
     private:
         virtual void reset();
         virtual void updatePath() { };
-        virtual void conquer(int x, int y, int adj_x, int adj_y) { };
+        virtual void conquer(int x, int y, int adj_x, int adj_y) = 0;
     };
 }
 

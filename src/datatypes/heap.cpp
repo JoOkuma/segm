@@ -1,6 +1,3 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
 #include <limits>
 #include <stdexcept>
@@ -26,20 +23,22 @@ Heap::Heap(int width, int height)
         node[i] = -1;
     }
 
-    for (int i = 0, r = 0; i < size; i++, r += w)
+    for (int i = 0, r = 0; i < h; i++, r += w)
         row[i] = r;
 }
 
 Heap::Heap(int width, int height, float *pathval)
 {
     size = width * height;
+    w = width;
+    h = height;
     value = pathval;
     color = new heap_color[size];
     node = new int[size];
     pos = new int[size];
     last = -1;
     policy = min_value;
-    row = new int[height];
+    row = new int[h];
 
     for (int i = 0; i < size; i++) {
         color[i] = white;
@@ -47,17 +46,17 @@ Heap::Heap(int width, int height, float *pathval)
         node[i] = -1;
     }
 
-    for (int i = 0, r = 0; i < size; i++, r += width)
+    for (int i = 0, r = 0; i < h; i++, r += width)
         row[i] = r;
 
 }
 
 Heap::~Heap()
 {
-    delete color;
-    delete node;
-    delete pos;
-    delete row;
+    delete[] color;
+    delete[] node;
+    delete[] pos;
+    delete[] row;
 }
 
 void Heap::setValues(float *pathval)

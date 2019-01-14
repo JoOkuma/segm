@@ -1,3 +1,5 @@
+#include "test.h"
+#include "datatypes/heap.h"
 #include "datatypes/heaptest.h"
 
 void heap_test()

@@ -1,6 +1,3 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
 #ifndef SEGM_WATERCUT_H
 #define SEGM_WATERCUT_H

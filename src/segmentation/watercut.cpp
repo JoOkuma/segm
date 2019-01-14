@@ -1,9 +1,4 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
-#include <stdexcept>
-#include <limits>
 #include "watercut.h"
 
 using namespace segm;
