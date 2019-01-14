@@ -1,6 +1,3 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
 #ifndef SEGM_HEAP_H
 #define SEGM_HEAP_H

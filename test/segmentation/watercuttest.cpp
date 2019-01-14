@@ -1,3 +1,5 @@
+#include "test.h"
+#include "segmentation/watercut.h"
 #include "segmentation/watercuttest.h"
 
 void watercut_test()

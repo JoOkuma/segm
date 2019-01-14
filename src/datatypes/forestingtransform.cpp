@@ -1,6 +1,3 @@
-//
-// Created by jookuma on 10/01/19.
-//
 
 #include <stdexcept>
 #include <limits>
@@ -77,28 +74,28 @@ Image<float> ForestingTransform::getCost()
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting costs");
-    return cost;
+    return cost.copy();
 }
 
 Image<int> ForestingTransform::getRoot()
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting roots");
-    return root;
+    return root.copy();
 }
 
 Image<int> ForestingTransform::getPred()
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting predecessors");
-    return pred;
+    return pred.copy();
 }
 
 Image<int> ForestingTransform::getLabel()
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting labels");
-    return label;
+    return label.copy();
 }
 
 void ForestingTransform::reset()
