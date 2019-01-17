@@ -1,20 +1,18 @@
 set(SOURCE_FILES
         datatypes/forestingtransform.cpp
-        datatypes/heap.cpp
-        datatypes/image.cpp
-        datatypes/matrix.cpp
-        metriclearn/largemargin.cpp
-        segmentation/watercut.cpp)
-
-set(HEADER_FILES
         datatypes/forestingtransform.h
+        datatypes/heap.cpp
         datatypes/heap.h
+        datatypes/image.cpp
         datatypes/image.h
+        datatypes/matrix.cpp
         datatypes/matrix.h
+        metriclearn/largemargin.cpp
         metriclearn/largemargin.h
+        segmentation/watercut.cpp
         segmentation/watercut.h)
 
-add_library(segm ${SOURCE_FILES} ${HEADER_FILES})
+add_library(segm ${SOURCE_FILES})
 
 find_package(CBLAS REQUIRED)
 target_include_directories(segm PRIVATE ${CBLAS_INCLUDES})
@@ -25,7 +23,9 @@ target_link_libraries(segm PRIVATE OpenMP::OpenMP_CXX)
 
 target_include_directories(segm PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-install(FILES ${HEADER_FILES} DESTINATION include)
 install(TARGETS segm DESTINATION lib)
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
+        DESTINATION include
+        FILES_MATCHING PATTERN "*/*.h")
 install(FILES ../cmake/segmConfig.cmake
         DESTINATION lib/cmake/segm)
