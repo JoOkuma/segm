@@ -12,13 +12,3 @@ add_subdirectory(src)
 enable_testing()
 add_subdirectory(test)
 
-install(TARGETS segm
-        LIBRARY
-            DESTINATION lib
-        ARCHIVE
-            DESTINATION lib
-        RUNTIME
-            DESTINATION bin
-        INCLUDES
-            DESTINATION include
-        CONFIGURATIONS Release)
