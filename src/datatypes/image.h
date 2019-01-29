@@ -25,9 +25,11 @@ namespace segm {
 
         int getWidth() const { return w; }
 
-        T *getFeat(int x, int y) const { return &feat[row[y] + col[x]]; };
+        int getBands() const { return b; }
 
-        T *getFeat() const { return feat; }
+        T *getFeats(int x, int y) const { return &feat[row[y] + col[x]]; };
+
+        T *getFeats() const { return feat; }
 
         T squaredl2norm(int x1, int y1, int x2, int y2);
 
@@ -37,11 +39,17 @@ namespace segm {
 
         int index(int x, int y) const { return row_index[y] + x; }
 
-        T max(T a, T b) { return (a > b) ? a : b; }
+        T max(T a, T b) { return ((a > b) ? a : b); }
+
+        T &operator()(int x, int y, int b) { return feat[row[y] + col[x] + b]; }
+        T operator()(int x, int y, int b) const { return feat[row[y] + col[x] + b]; }
 
         /* only for 1 band images */
         T &operator()(int x, int y) { return feat[row_index[y] + x]; }
+        T operator()(int x, int y) const { return feat[row_index[y] + x]; }
+
         T &operator()(int p) { return feat[p]; }
+        T operator()(int p) const { return feat[p]; }
 
         bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
 
@@ -150,8 +158,8 @@ namespace segm {
     template<typename T>
     inline T Image<T>::squaredl2norm(int x1, int y1, int x2, int y2) {
         T dist = 0;
-        T *v1 = getFeat(x1, y1);
-        T *v2 = getFeat(x2, y2);
+        T *v1 = getFeats(x1, y1);
+        T *v2 = getFeats(x2, y2);
 
         for (int i = 0; i < b; i++) {
             T diff = v1[i] - v2[i];
@@ -164,7 +172,7 @@ namespace segm {
     template <typename T>
     Image<T> Image<T>::copy() const {
         Image<T> out(w, h);
-        for (int i = 0; i < w * h; i++) {
+        for (int i = 0; i < w * h * b; i++) {
             out(i) = feat[i];
         }
         return out;

@@ -13,7 +13,7 @@ void WaterCut::conquer(int x, int y, int adj_x, int adj_y)
         float tmp = max(arc_weight, cost(p));
         if (tmp < cost(q))
         {
-            cost(q)  = arc_weight;
+            cost(q)  = tmp;
             root(q)  = root(p);
             pred(q)  = p;
             label(q) = label(p);

@@ -25,11 +25,16 @@ ForestingTransform::ForestingTransform(int width, int height, int bands, const f
         pred(w, h),
         label(w, h)
 {
-
 }
 
 ForestingTransform::~ForestingTransform() {
 
+}
+
+void ForestingTransform::setFeats(const float *feats)
+{
+    for (int i = 0; i < w * h * b; i++)
+        feat[i] = feats[i];
 }
 
 void ForestingTransform::run(Image<int> &markers, int plato)
@@ -109,5 +114,5 @@ void ForestingTransform::reset()
         label(p) = nil;
     }
 
-    heap.setValues(cost.getFeat());
+    heap.setValues(cost.getFeats());
 }

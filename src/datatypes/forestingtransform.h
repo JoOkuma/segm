@@ -14,6 +14,8 @@ namespace segm
         ForestingTransform(int width, int height, int bands, const float *feats);
         ~ForestingTransform() override;
 
+        void setFeats(const float *feats);
+
         void run(Image<int> &markers, int height = 1);
 
         Image<float> getCost();
