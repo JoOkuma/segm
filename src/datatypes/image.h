@@ -35,7 +35,7 @@ namespace segm {
         T squaredl2norm(int x1, int y1, int x2, int y2);
 
         Pixel coord(int p) {
-            return Pixel{.x = p % w, .y = p / h};
+            return Pixel{.x = p % w, .y = p / w};
         };
 
         int index(int x, int y) const { return row_index[y] + x; }

@@ -19,7 +19,9 @@ target_include_directories(segm PRIVATE ${CBLAS_INCLUDES})
 target_link_libraries(segm PRIVATE ${CBLAS_LIBRARIES})
 
 find_package(OpenMP)
-target_link_libraries(segm PRIVATE OpenMP::OpenMP_CXX)
+if (OPENMP_FOUND)
+    target_link_libraries(segm PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 target_include_directories(segm PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

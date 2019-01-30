@@ -14,7 +14,6 @@ namespace segm
                 ForestingTransform(width, height, bands) { };
         WaterCut(int width, int height, int bands, const float *feats) :
                 ForestingTransform(width, height, bands, feats) { };
-        ~WaterCut() { };
 
     private:
         void conquer(int x, int y, int adj_x, int adj_y) override;

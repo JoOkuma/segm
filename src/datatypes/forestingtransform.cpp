@@ -28,7 +28,8 @@ ForestingTransform::ForestingTransform(int width, int height, int bands, const f
 {
 }
 
-ForestingTransform::~ForestingTransform() {
+ForestingTransform::~ForestingTransform()
+{
 
 }
 
@@ -59,7 +60,9 @@ void ForestingTransform::run(Image<int> &markers, int plato)
         int p = heap.pop();
 
         if (root(p) == p) {
-            cost(p) = 0; // TODO VERIFICAR SE ISSO NAO BUGA HEAP
+            // TODO
+            //  - verificar se isto não buga o heap (acredito que não, ele já saiu da fila)
+            cost(p) = 0;
         }
 
         updatePath();
@@ -109,7 +112,8 @@ Image<int> ForestingTransform::getPredCount() const
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting predecessors count");
 
-    // TODO faster implementation (worst case of this is O(n^2)
+    // TODO
+    //  - faster implementation (worst case of this is O(n^2)
     Image<int> count(w, h);
     for (int p = 0; p < w * h; p++) {
         for (int q = p; pred(q) != nil; q = pred(q)) {
@@ -138,7 +142,8 @@ Image<int> ForestingTransform::getLeafPredCount() const
         }
     }
 
-    // TODO faster implementation (worst case of this is O(n^2)
+    // TODO
+    //  - faster implementation (worst case of this is O(n^2)
     Image<int> count(w, h);
     for (int p = 0; p < w * h; p++) {
         if (control(p)) {
