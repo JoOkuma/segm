@@ -19,6 +19,8 @@ namespace segm {
         Image(int width, int height, int bands);
         Image(int width, int height, int bands, const T *_feat);
         Image(int width, int height, const T *_feat);
+        Image(int width, int height, int bands, T *_feat, bool alloc = true);
+        Image(int width, int height, T *_feat, bool alloc = true);
 
         virtual ~Image();
 
@@ -63,40 +65,25 @@ namespace segm {
         int argmin() const;
 
     protected:
-        int h; /* h */
-        int w; /* w */
-        int b; /* bands */
+        int h = 0; /* h */
+        int w = 0; /* w */
+        int b = 0; /* bands */
         T *feat = nullptr;
 
         /* lookup table */
         int *row = nullptr; /* w plus band length padding */
         int *col = nullptr; /* band padding only */
         int *row_index = nullptr; /* w padding only */
+
+        bool allocated = true; /* option to not alloc features, just point to it */
     };
-
-    template<typename T>
-    Image<T>::Image(int width, int height) {
-        w = width;
-        h = height;
-        b = 1;
-
-        feat = new T[w * h]();
-        row = new int[h];
-        row_index = new int[h];
-        col = new int[w];
-        for (int i = 0, r = 0; i < h; i++, r += w) {
-            row[i] = r;
-            row_index[i] = r;
-        }
-        for (int i = 0; i < w; i++)
-            col[i] = i;
-    }
 
     template<typename T>
     Image<T>::Image(int width, int height, int bands) {
         w = width;
         h = height;
         b = bands;
+        allocated = true;
 
         feat = new T[w * h * b]();
         row = new int[h];
@@ -115,6 +102,7 @@ namespace segm {
         w = width;
         h = height;
         b = bands;
+        allocated = true;
 
         feat = new T[w * h * b];
         row = new int[h];
@@ -133,30 +121,49 @@ namespace segm {
     }
 
     template<typename T>
-    Image<T>::Image(int width, int height, const T *_feat) {
+    Image<T>::Image(int width, int height, int bands, T *_feat, bool alloc) {
         w = width;
         h = height;
-        b = 1;
+        b = bands;
 
-        feat = new T[w * h];
+        if (alloc) {
+            allocated = true;
+            feat = new T[w * h * b];
+            for (int i = 0; i < w * h * b; i++)
+                feat[i] = _feat[i];
+        } else {
+            allocated = false;
+            feat = _feat;
+        }
+
         row = new int[h];
         row_index = new int[h];
         col = new int[w];
         for (int i = 0, r = 0; i < h; i++, r += w) {
-            row[i] = r;
+            row[i] = r * b;
             row_index[i] = r;
         }
 
-        for (int i = 0; i < w; i++)
-            col[i] = i;
-
-        for (int i = 0; i < w * h; i++)
-            feat[i] = _feat[i];
+        for (int i = 0, c = 0; i < w; i++, c += b)
+            col[i] = c;
     }
 
     template<typename T>
+    Image<T>::Image(int width, int height) :
+            Image<T>(width, height, 1) { }
+
+    template<typename T>
+    Image<T>::Image(int width, int height, const T *_feat) :
+            Image<T>(width, height, 1, _feat) { }
+
+    template<typename T>
+    Image<T>::Image(int width, int height, T *_feat, bool alloc) :
+            Image<T>(width, height, 1, _feat, alloc) { }
+
+    template<typename T>
     Image<T>::~Image() {
-        delete[] feat;
+        if (allocated)
+            delete[] feat;
         delete[] row;
         delete[] col;
         delete[] row_index;
