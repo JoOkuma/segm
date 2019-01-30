@@ -1,6 +1,7 @@
 
 #include <stdexcept>
 #include <limits>
+
 #include "forestingtransform.h"
 
 using namespace segm;
@@ -75,32 +76,79 @@ void ForestingTransform::run(Image<int> &markers, int plato)
 }
 
 
-Image<float> ForestingTransform::getCost()
+Image<float> ForestingTransform::getCost() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting costs");
     return cost.copy();
 }
 
-Image<int> ForestingTransform::getRoot()
+Image<int> ForestingTransform::getRoot() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting roots");
     return root.copy();
 }
 
-Image<int> ForestingTransform::getPred()
+Image<int> ForestingTransform::getPred() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting predecessors");
     return pred.copy();
 }
 
-Image<int> ForestingTransform::getLabel()
+Image<int> ForestingTransform::getLabel() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting labels");
     return label.copy();
+}
+
+Image<int> ForestingTransform::getPredCount() const
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before getting predecessors count");
+
+    // TODO faster implementation (worst case of this is O(n^2)
+    Image<int> count(w, h);
+    for (int p = 0; p < w * h; p++) {
+        for (int q = p; pred(q) != nil; q = pred(q)) {
+            count(pred(q)) += 1;
+        }
+    }
+
+    return count;
+}
+
+Image<int> ForestingTransform::getLeafPredCount() const
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before getting predecessors count");
+
+    Image<bool> control(w, h);
+
+    for (int p = 0; p < w * h; p++) {
+        control(p) = true;
+    }
+
+    // selecting leafs
+    for (int p = 0; p < w * h; p++) {
+        if (pred(p) != nil) {
+            control(pred(p)) = false;
+        }
+    }
+
+    // TODO faster implementation (worst case of this is O(n^2)
+    Image<int> count(w, h);
+    for (int p = 0; p < w * h; p++) {
+        if (control(p)) {
+            for (int q = p; pred(q) != nil; q = pred(q)) {
+                count(pred(q)) += 1;
+            }
+        }
+    }
+
+    return count;
 }
 
 void ForestingTransform::reset()

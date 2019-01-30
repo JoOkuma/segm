@@ -18,10 +18,13 @@ namespace segm
 
         void run(Image<int> &markers, int height = 1);
 
-        Image<float> getCost();
-        Image<int> getRoot();
-        Image<int> getPred();
-        Image<int> getLabel();
+        Image<float> getCost() const;
+        Image<int> getRoot() const;
+        Image<int> getPred() const;
+        Image<int> getLabel() const;
+
+        Image<int> getPredCount() const;
+        Image<int> getLeafPredCount() const;
 
     protected:
         const int nil = -1;

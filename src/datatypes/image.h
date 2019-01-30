@@ -3,6 +3,7 @@
 #define SEGM_SEGMIMAGE_H
 
 #include <stdexcept>
+#include <limits>
 
 namespace segm {
     template<typename T>
@@ -53,7 +54,13 @@ namespace segm {
 
         bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
 
-        Image<T> copy() const ;
+        Image<T> copy() const;
+
+        T max() const;
+        T min() const;
+
+        int argmax() const;
+        int argmin() const;
 
     protected:
         int h; /* h */
@@ -178,6 +185,49 @@ namespace segm {
         return out;
     }
 
+    template<typename T>
+    T Image<T>::max() const {
+        T maximum = std::numeric_limits<T>::min();
+        for (int i = 0; i < w * h * b; i++) {
+            if (feat[i] > maximum) maximum = feat[i];
+        }
+        return maximum;
+    }
+
+    template<typename T>
+    T Image<T>::min() const {
+        T minimum = std::numeric_limits<T>::max();
+        for (int i = 0; i < w * h * b; i++) {
+            if (feat[i] < minimum) minimum = feat[i];
+        }
+        return minimum;
+    }
+
+    template<typename T>
+    int Image<T>::argmax() const {
+        T maximum = std::numeric_limits<T>::min();
+        int p = -1;
+        for (int i = 0; i < w * h * b; i++) {
+            if (feat[i] > maximum) {
+                maximum = feat[i];
+                p = i;
+            }
+        }
+        return p;
+    }
+
+    template<typename T>
+    int Image<T>::argmin() const {
+        T minimum = std::numeric_limits<T>::max();
+        int p = -1;
+        for (int i = 0; i < w * h * b; i++) {
+            if (feat[i] < minimum) {
+                minimum = feat[i];
+                p = i;
+            }
+        }
+        return p;
+    }
 }
 #endif //SEGM_SEGMIMAGE_H
 
