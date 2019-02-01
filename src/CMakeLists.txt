@@ -10,7 +10,9 @@ set(SOURCE_FILES
         metriclearn/largemargin.cpp
         metriclearn/largemargin.h
         segmentation/watercut.cpp
-        segmentation/watercut.h)
+        segmentation/watercut.h
+        utils/color.cpp
+        utils/color.h)
 
 add_library(segm ${SOURCE_FILES})
 

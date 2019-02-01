@@ -5,7 +5,9 @@ add_executable(main_test
         metriclearn/largemargintest.cpp
         metriclearn/largemargintest.h
         segmentation/watercuttest.cpp
-        segmentation/watercuttest.h)
+        segmentation/watercuttest.h
+        utils/colortest.cpp
+        utils/colortest.h)
 
 target_include_directories(main_test PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(main_test segm)

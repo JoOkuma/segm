@@ -5,15 +5,27 @@
 #include <stdexcept>
 #include <limits>
 
+#include "utils/color.h"
+
 namespace segm {
     template<typename T>
     class Image {
 
     public:
+
         typedef struct {
             int x;
             int y;
         } Pixel;
+
+        typedef enum {
+            rgb = 0x00,
+            xyz = 0x01,
+            lab = 0x02,
+            ypbpr = 0x04,
+            hsv = 0x08,
+            gray = 0x10,
+        } ColorSpace;
 
         Image(int width, int height);
         Image(int width, int height, int bands);
@@ -30,7 +42,9 @@ namespace segm {
 
         int getBands() const { return b; }
 
-        T *getFeats(int x, int y) const { return &feat[row[y] + col[x]]; };
+        T *getFeats(int x, int y) const { return &feat[row[y] + col[x]]; }
+
+        T *getFeats(int p) const { return &feat[p]; }
 
         T *getFeats() const { return feat; }
 
@@ -38,7 +52,7 @@ namespace segm {
 
         Pixel coord(int p) {
             return Pixel{.x = p % w, .y = p / w};
-        };
+        }
 
         int index(int x, int y) const { return row_index[y] + x; }
 
@@ -63,6 +77,14 @@ namespace segm {
 
         int argmax() const;
         int argmin() const;
+
+        template<typename U>
+        Image<U> convert() const;
+
+        Image<double> convert(ColorSpace from, ColorSpace to, double normalization = 1) const;
+
+        template<typename U>
+        Image<U> rescale() const;
 
     protected:
         int h = 0; /* h */
@@ -235,6 +257,117 @@ namespace segm {
         }
         return p;
     }
+
+
+    template<typename T>
+    template<typename U>
+    Image<U> Image<T>::convert() const
+    {
+        Image<U> out(w, h, b);
+        for (int p = 0; p < w * h * b; p++) {
+            out(p) = (U) feat[p];
+        }
+
+        return out;
+    }
+
+
+    template<typename T>
+    Image<double> Image<T>::convert(Image<T>::ColorSpace from, Image<T>::ColorSpace to, double normalization) const
+    {
+        void (*convFun)(const double *, double*) = nullptr;
+
+        unsigned int conversion = (from << 16) | to;
+        switch (conversion)
+        {
+            case (rgb << 16) | xyz:
+                convFun = rgb2xyz;
+                break;
+            case (xyz << 16) | rgb:
+                convFun = xyz2rgb;
+                break;
+            case (xyz << 16) | lab:
+                convFun = xyz2lab;
+                break;
+            case (lab << 16) | xyz:
+                convFun = lab2xyz;
+                break;
+            case (rgb << 16) | lab:
+                convFun = rgb2lab;
+                break;
+            case (lab << 16) | rgb:
+                convFun = lab2rgb;
+                break;
+            case (rgb << 16) | ypbpr:
+                convFun = rgb2ypbpr;
+                break;
+            case (ypbpr << 16) | rgb:
+                convFun = ypbpr2rgb;
+                break;
+            case (rgb << 16) | hsv:
+                convFun = rgb2hsv;
+                break;
+            case (hsv << 16) | rgb:
+                convFun = hsv2rgb;
+                break;
+            case (rgb << 16) | gray:
+                convFun = rgb2gray;
+                break;
+            case (gray << 16) | rgb:
+                convFun = gray2rgb;
+                break;
+            default:
+                throw std::invalid_argument("Color conversion requested not found");
+        }
+
+        double dbl_feat[3];
+        Image<double> out(w, h, ((from != gray) ? 3 : 1));
+
+        for (int p = 0; p < w * h; p++) {
+            switch (from) {
+                case gray:
+                    dbl_feat[0] = feat[p] / normalization;
+                    break;
+                default:
+                    dbl_feat[0] = feat[p] / normalization;
+                    dbl_feat[1] = feat[p + 1] / normalization;
+                    dbl_feat[2] = feat[p + 2] / normalization;
+            }
+            convFun(dbl_feat, out.getFeats(p));
+        }
+
+        return out;
+    }
+
+
+    template<typename T>
+    template<typename U>
+    Image<U> Image<T>::rescale() const
+    {
+        Image<U> out(w, h, b);
+        #ifdef _OPENMP
+            #pragma omp parallel for
+        #endif
+        for (int bb = 0; bb < b; bb++) {
+            T max = std::numeric_limits<T>::min();
+            T min = std::numeric_limits<T>::max();
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    T val = (*this)(i, j, bb);
+                    if (val > max) max = val;
+                    if (val < min) min = val;
+                }
+            }
+
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    out(i, j, bb) = (U) (((*this)(i, j, bb) - min) / max);
+                }
+            }
+        }
+        return out;
+    }
+
 }
 #endif //SEGM_SEGMIMAGE_H
 
