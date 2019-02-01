@@ -100,4 +100,11 @@ void gray2rgb(const double *in_color, double *out_color);
  */
 void rgb2gray(const double *in_color, double *out_color);
 
+/**
+ * @param in_color      RGB color components
+ * @param out_color     RG Chromaticity color components
+ * @details             https://en.wikipedia.org/wiki/Rg_chromaticity
+ */
+void rgb2rgchroma(const double *in_color, double *out_color);
+
 #endif //SEGM_COLOR_H

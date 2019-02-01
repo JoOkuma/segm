@@ -241,3 +241,12 @@ void rgb2gray(const double *in_color, double *out_color)
     rgb2lab(in_color, lab);
     out_color[0] = lab[0] / 100.0;
 }
+
+
+void rgb2rgchroma(const double *in_color, double *out_color)
+{
+    double sum = in_color[0] + in_color[1] + in_color[2];
+    out_color[0] = in_color[0] / sum;
+    out_color[1] = in_color[1] / sum;
+    out_color[2] = in_color[2] / sum;
+}

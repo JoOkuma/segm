@@ -25,6 +25,7 @@ namespace segm {
             ypbpr = 0x04,
             hsv = 0x08,
             gray = 0x10,
+            rgchroma = 0x20
         } ColorSpace;
 
         Image(int width, int height);
@@ -315,6 +316,9 @@ namespace segm {
                 break;
             case (gray << 16) | rgb:
                 convFun = gray2rgb;
+                break;
+            case (rgb << 16) | rgchroma:
+                convFun = rgb2rgchroma;
                 break;
             default:
                 throw std::invalid_argument("Color conversion requested not found");
