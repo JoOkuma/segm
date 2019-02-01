@@ -16,8 +16,9 @@ void watercut_test()
                         1, -1, -1, -1, -1,
                        -1, -1, -1, -1,  2};
 
+    segm::Image<float> original(5, 5, 1, array);
     segm::Image<int> markers(5, 5, m_array);
-    segm::WaterCut cut(5, 5, 1, array);
+    segm::WaterCut cut(original);
 
     cut.run(markers);
     segm::Image<int> label = cut.getLabel();

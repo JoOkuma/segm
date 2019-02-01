@@ -18,14 +18,14 @@ namespace segm {
             int y;
         } Pixel;
 
-        typedef enum {
+        typedef enum : int {
             rgb = 0x00,
             xyz = 0x01,
             lab = 0x02,
-            ypbpr = 0x04,
-            hsv = 0x08,
-            gray = 0x10,
-            rgchroma = 0x20
+            ypbpr = 0x03,
+            hsv = 0x04,
+            gray = 0x05,
+            rgchroma = 0x10
         } ColorSpace;
 
         Image(int width, int height);
@@ -34,6 +34,7 @@ namespace segm {
         Image(int width, int height, const T *_feat);
         Image(int width, int height, int bands, T *_feat, bool alloc = true);
         Image(int width, int height, T *_feat, bool alloc = true);
+        Image(const Image<T> &image);
 
         virtual ~Image();
 
@@ -58,6 +59,8 @@ namespace segm {
         int index(int x, int y) const { return row_index[y] + x; }
 
         T max(T a, T b) { return ((a > b) ? a : b); }
+
+        Image<T> &operator=(const Image<T> &image);
 
         T &operator()(int x, int y, int b) { return feat[row[y] + col[x] + b]; }
         T operator()(int x, int y, int b) const { return feat[row[y] + col[x] + b]; }
@@ -86,6 +89,8 @@ namespace segm {
 
         template<typename U>
         Image<U> rescale() const;
+
+        bool isChromatic(ColorSpace space) { return (space & 0x10); }
 
     protected:
         int h = 0; /* h */
@@ -184,6 +189,10 @@ namespace segm {
             Image<T>(width, height, 1, _feat, alloc) { }
 
     template<typename T>
+    Image<T>::Image(const Image<T> &image) :
+            Image<T>(image.getWidth(), image.getHeight(), image.getBands(), image.getFeats()) { }
+
+    template<typename T>
     Image<T>::~Image() {
         if (allocated)
             delete[] feat;
@@ -206,9 +215,42 @@ namespace segm {
         return dist;
     }
 
-    template <typename T>
+    template<typename T>
+    Image<T> &Image<T>::operator=(const Image<T> &image)
+    {
+        if (allocated)
+            delete[] feat;
+        delete[] row;
+        delete[] col;
+        delete[] row_index;
+
+        T* _feat = image.getFeats();
+        w = image.getWidth();
+        h = image.getHeight();
+        b = image.getBands();
+        allocated = true;
+
+        feat = new T[w * h * b];
+        row = new int[h];
+        row_index = new int[h];
+        col = new int[w];
+        for (int i = 0, r = 0; i < h; i++, r += w) {
+            row[i] = r * b;
+            row_index[i] = r;
+        }
+
+        for (int i = 0, c = 0; i < w; i++, c += b)
+            col[i] = c;
+
+        for (int i = 0; i < w * h * b; i++)
+            feat[i] = _feat[i];
+
+        return (*this);
+    }
+
+    template<typename T>
     Image<T> Image<T>::copy() const {
-        Image<T> out(w, h);
+        Image<T> out(w, h, b);
         for (int i = 0; i < w * h * b; i++) {
             out(i) = feat[i];
         }
@@ -276,6 +318,9 @@ namespace segm {
     template<typename T>
     Image<double> Image<T>::convert(Image<T>::ColorSpace from, Image<T>::ColorSpace to, double normalization) const
     {
+        if (from == to)
+            return convert<double>();
+
         void (*convFun)(const double *, double*) = nullptr;
 
         unsigned int conversion = (from << 16) | to;
@@ -325,19 +370,23 @@ namespace segm {
         }
 
         double dbl_feat[3];
-        Image<double> out(w, h, ((from != gray) ? 3 : 1));
+        Image<double> out(w, h, ((to != gray) ? 3 : 1));
 
-        for (int p = 0; p < w * h; p++) {
+        for (int i = 0, p = 0; i < w * h; i++) {
             switch (from) {
                 case gray:
                     dbl_feat[0] = feat[p] / normalization;
+                    convFun(dbl_feat, out.getFeats(p));
+                    p++;
                     break;
                 default:
                     dbl_feat[0] = feat[p] / normalization;
                     dbl_feat[1] = feat[p + 1] / normalization;
                     dbl_feat[2] = feat[p + 2] / normalization;
+                    convFun(dbl_feat, out.getFeats(p));
+                    p += 3;
+                    break;
             }
-            convFun(dbl_feat, out.getFeats(p));
         }
 
         return out;
