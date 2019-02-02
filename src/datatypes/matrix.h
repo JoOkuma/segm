@@ -10,7 +10,7 @@
 
 namespace segm
 {
-    template <typename T>
+    template<typename T>
     class Matrix
     {
     public:
@@ -68,9 +68,11 @@ namespace segm
 
         T &operator()(int idx) const { return feat[idx]; }
 
-        void print();
+        void print() const;
 
-        Matrix<T> copy();
+        Matrix<T> copy() const;
+
+        T sum() const;
 
     protected:
         int row;
@@ -80,7 +82,7 @@ namespace segm
         int *row_index = nullptr;
     };
 
-    template <typename T>
+    template<typename T>
     Matrix<T>::Matrix(int _row, int _col) : row(_row), col(_col)
     {
         feat = new T[row * col]();
@@ -89,7 +91,7 @@ namespace segm
             row_index[i] = r;
     }
 
-    template <typename T>
+    template<typename T>
     Matrix<T>::Matrix(int _row, int _col, const T *array) : row(_row), col(_col)
     {
         feat = new T[row * col]();
@@ -100,20 +102,20 @@ namespace segm
         setFeat(array);
     }
 
-    template <typename T>
+    template<typename T>
     Matrix<T>::~Matrix()
     {
         delete[] feat;
         delete[] row_index;
     }
 
-    template <typename T>
+    template<typename T>
     void Matrix<T>::setFeat(const T *array) {
         for (int i = 0; i < row * col; i++)
             feat[i] = array[i];
     }
 
-    template <typename T>
+    template<typename T>
     Matrix<T> Matrix<T>::mult(const Matrix<T> &B, bool A_transpose,
                                       bool B_transpose, float alpha) const
     {
@@ -127,13 +129,13 @@ namespace segm
         return C;
     }
 
-    template <typename T>
+    template<typename T>
     Matrix<T> Matrix<T>::operator*(Matrix<T> &B) {
         return mult(B);
     }
 
-    template <typename T>
-    void Matrix<T>::print() {
+    template<typename T>
+    void Matrix<T>::print() const  {
         for (int i = 0; i < row; i++) {
             std::cout << (*this)(i, 0);
             for (int j = 1; j < col; j++) {
@@ -143,10 +145,18 @@ namespace segm
         }
     }
 
-    template <typename T>
-    Matrix<T> Matrix<T>::copy() {
+    template<typename T>
+    Matrix<T> Matrix<T>::copy() const {
         Matrix<T> out(row, col, feat);
         return out;
+    }
+
+    template<typename T>
+    T Matrix<T>::sum() const {
+        T res = 0;
+        for (int i = 0; i < row * col; i++)
+            res += feat[i];
+        return res;
     }
 }
 

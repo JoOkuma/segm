@@ -66,13 +66,13 @@ namespace segm {
         T operator()(int x, int y, int b) const { return feat[row[y] + col[x] + b]; }
 
         /* only for 1 band images */
-        T &operator()(int x, int y) { return feat[row_index[y] + x]; }
-        T operator()(int x, int y) const { return feat[row_index[y] + x]; }
+        T &operator()(int x, int y) { return feat[row[y] + x]; }
+        T operator()(int x, int y) const { return feat[row[y] + x]; }
 
         T &operator()(int p) { return feat[p]; }
         T operator()(int p) const { return feat[p]; }
 
-        bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
+        inline bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
 
         Image<T> copy() const;
 

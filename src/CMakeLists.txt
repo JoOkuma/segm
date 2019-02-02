@@ -7,6 +7,8 @@ set(SOURCE_FILES
         datatypes/image.h
         datatypes/matrix.cpp
         datatypes/matrix.h
+        imgproc/filter.cpp
+        imgproc/filter.h
         metriclearn/largemargin.cpp
         metriclearn/largemargin.h
         segmentation/watercut.cpp
