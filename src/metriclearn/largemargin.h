@@ -17,7 +17,7 @@ namespace segm
 
         ~LargeMargin();
 
-        Matrix<float> transform(const Matrix<float> &data) { return data.mult(*L, false, true); }
+        Matrix<float> transform(const Matrix<float> &data) const { return data.mult(*L, false, true); }
 
         void train(Matrix<float> *_data, const int *_label);
 

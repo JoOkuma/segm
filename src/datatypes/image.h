@@ -50,6 +50,8 @@ namespace segm {
 
         T *getFeats() const { return feat; }
 
+        void setFeats(const T *array);
+
         T squaredl2norm(int x1, int y1, int x2, int y2);
 
         Pixel coord(int p) {
@@ -144,8 +146,7 @@ namespace segm {
         for (int i = 0, c = 0; i < w; i++, c += b)
             col[i] = c;
 
-        for (int i = 0; i < w * h * b; i++)
-            feat[i] = _feat[i];
+        setFeats(_feat);
     }
 
     template<typename T>
@@ -157,8 +158,7 @@ namespace segm {
         if (alloc) {
             allocated = true;
             feat = new T[w * h * b];
-            for (int i = 0; i < w * h * b; i++)
-                feat[i] = _feat[i];
+            setFeats(_feat);
         } else {
             allocated = false;
             feat = _feat;
@@ -202,6 +202,13 @@ namespace segm {
     };
 
     template<typename T>
+    void Image<T>::setFeats(const T *_feat)
+    {
+        for (int i = 0; i < w * h * b; i++)
+            feat[i] = _feat[i];
+    }
+
+    template<typename T>
     inline T Image<T>::squaredl2norm(int x1, int y1, int x2, int y2) {
         T dist = 0;
         T *v1 = getFeats(x1, y1);
@@ -218,32 +225,34 @@ namespace segm {
     template<typename T>
     Image<T> &Image<T>::operator=(const Image<T> &image)
     {
-        if (allocated)
-            delete[] feat;
-        delete[] row;
-        delete[] col;
-        delete[] row_index;
+        if (w != image.getWidth() || h != image.getHeight() ||
+            b != image.getBands() || !allocated)
+        {
+            if (allocated)
+                delete[] feat;
+            delete[] row;
+            delete[] col;
+            delete[] row_index;
 
-        T* _feat = image.getFeats();
-        w = image.getWidth();
-        h = image.getHeight();
-        b = image.getBands();
-        allocated = true;
+            w = image.getWidth();
+            h = image.getHeight();
+            b = image.getBands();
+            allocated = true;
 
-        feat = new T[w * h * b];
-        row = new int[h];
-        row_index = new int[h];
-        col = new int[w];
-        for (int i = 0, r = 0; i < h; i++, r += w) {
-            row[i] = r * b;
-            row_index[i] = r;
+            feat = new T[w * h * b];
+            row = new int[h];
+            row_index = new int[h];
+            col = new int[w];
+            for (int i = 0, r = 0; i < h; i++, r += w) {
+                row[i] = r * b;
+                row_index[i] = r;
+            }
+
+            for (int i = 0, c = 0; i < w; i++, c += b)
+                col[i] = c;
         }
 
-        for (int i = 0, c = 0; i < w; i++, c += b)
-            col[i] = c;
-
-        for (int i = 0; i < w * h * b; i++)
-            feat[i] = _feat[i];
+        setFeats(image.getFeats());
 
         return (*this);
     }
@@ -251,9 +260,7 @@ namespace segm {
     template<typename T>
     Image<T> Image<T>::copy() const {
         Image<T> out(w, h, b);
-        for (int i = 0; i < w * h * b; i++) {
-            out(i) = feat[i];
-        }
+        out.setFeats(feat);
         return out;
     }
 

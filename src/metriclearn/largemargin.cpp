@@ -162,7 +162,7 @@ void LargeMargin::createDistTable(Matrix<float> *current)
     for (int i = 1; i < size; i++) {
         int row_id = (i * (i - 1)) / 2;
         for (int j = 0; j < i; j++) {
-            dist_table[row_id + j] = squaredl2norm(current->getFeat(i), current->getFeat(j));
+            dist_table[row_id + j] = squaredl2norm(current->getFeats(i), current->getFeats(j));
         }
     }
 
@@ -178,7 +178,7 @@ float LargeMargin::distance(int i, int j)
     if (i == j) return std::numeric_limits<float>::max();
 
     if (!dist_table_computed)
-        return squaredl2norm(current_data->getFeat(i), current_data->getFeat(j));
+        return squaredl2norm(current_data->getFeats(i), current_data->getFeats(j));
 
     int greater = (i > j) ? i : j;
     int lower = (i > j) ? j : i;
