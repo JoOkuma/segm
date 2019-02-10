@@ -4,6 +4,8 @@
 #include "metriclearn/largemargin.h"
 #include "metriclearn/largemargintest.h"
 
+// TODO FINISH THIS TEST
+
 void largemargin_test()
 {
     float data[600] = {5.1,3.5,1.4,0.2,
@@ -161,18 +163,18 @@ void largemargin_test()
                       1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                       2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 
-
     segm::Matrix<float> X(150, 4, data);
-    segm::LargeMargin model(150, 4, 25);
-    model.train(&X, label);
-    segm::Matrix<float> L = model.getTransform();
+    segm::Vector<int> y(150, label);
+    segm::LargeMargin model(X, y, 4, 25);
+    model.train(X);
+    segm::Matrix<double> L = model.getTransform();
 
-    float approx_L[16] = {0.778656f,  0.0236188f, -0.156935f, -0.200179f,
-                          0.0671408f, 0.431359f,  0.358178f,  -0.111962f,
-                          -0.200485f, 0.273755f,  0.328352f,  0.128301f,
-                          -0.16074f, -0.154804f,  0.18853f,   1.20597f};
+    double approx_L[16] = {-0.0907092,  0.341927, -1.01361,  -1.10006,
+                           -0.465851,  -0.538927,  0.318754,  0.788224,
+                            0.616687,  -0.157116, -0.419395, -0.704183,
+                           -0.0238621, -0.494606,  0.253324,  0.472465};
 
     for (int i = 0; i < 16; i++) {
-        ASSERT_THROW(fabsf(L(i) - approx_L[i]) < 0.0001);
+        ASSERT_THROW(fabs(L(i) - approx_L[i]) < 0.0001);
     }
 }

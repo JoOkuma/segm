@@ -19,6 +19,8 @@ namespace segm
         T &operator[](int index) { return feat[index]; }
 
         Vector<T> &operator=(const Vector<T> &vector);
+        Vector<T> &operator=(T value);
+
         Vector<T> &operator+=(T value);
         Vector<T> &operator-=(T value);
         Vector<T> &operator*=(T value);
@@ -86,6 +88,14 @@ namespace segm
         }
 
         setFeats(vector.getFeats());
+
+        return (*this);
+    }
+
+    template<typename T>
+    Vector<T> &Vector<T>::operator=(T value) {
+        for (int i = 0; i < size; i++)
+            feat[i] = value;
 
         return (*this);
     }

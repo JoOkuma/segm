@@ -36,7 +36,7 @@ namespace segm {
 
         SVD(cov, U, S, Vt);
 
-        return U.trimRows(0, dimension_out);
+        return Vt.trimRows(0, dimension_out);
     }
 
 
@@ -73,7 +73,7 @@ namespace segm {
 
         SVD(cov, U, S, Vt);
 
-        return U.trimRows(0, dimension_out);
+        return Vt.trimRows(0, dimension_out);
     }
 
 

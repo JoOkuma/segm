@@ -8,7 +8,7 @@
 using namespace segm;
 
 NeighborCompAnalysis::NeighborCompAnalysis(Matrix<float> &_data, Vector<int> &_label, int output_dim,
-                                           int _iterations, float _learn_rate, bool _verbose) :
+                                           int _iterations, double _learn_rate, bool _verbose) :
         data(_data),
         label(_label),
         L(output_dim, data.getCol()),

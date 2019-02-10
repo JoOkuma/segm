@@ -30,7 +30,7 @@ void Matrix<float>::mult(const Matrix<float> &B, Matrix<float> &out, bool A_tran
 
     cblas_sgemm(CblasRowMajor, (A_transpose) ? CblasTrans : CblasNoTrans,
                 (B_transpose)  ? CblasTrans : CblasNoTrans, A_row, B_col,
-                A_col, alpha, feat, A_col, B.getFeats(), B_col, beta, out.getFeats(), B_col);
+                A_col, alpha, feat, col, B.getFeats(), B.getCol(), beta, out.getFeats(), out.getCol());
 }
 
 template<>
@@ -60,5 +60,5 @@ void Matrix<double>::mult(const Matrix<double> &B, Matrix<double> &out, bool A_t
 
     cblas_dgemm(CblasRowMajor, (A_transpose) ? CblasTrans : CblasNoTrans,
                 (B_transpose)  ? CblasTrans : CblasNoTrans, A_row, B_col,
-                A_col, alpha, feat, A_col, B.getFeats(), B_col, beta, out.getFeats(), B_col);
+                A_col, alpha, feat, col, B.getFeats(), B.getCol(), beta, out.getFeats(), out.getCol());
 }

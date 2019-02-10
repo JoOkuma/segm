@@ -25,6 +25,8 @@ namespace segm
         Matrix<T> operator*(Matrix<T> &B) { return mult(B); };
 
         Matrix<T> &operator=(const Matrix<T> &matrix);
+        Matrix<T> operator+(const Matrix<T> &matrix) const;
+        Matrix<T> operator-(const Matrix<T> &matrix) const;
         Matrix<T> &operator+=(const Matrix<T> &matrix);
         Matrix<T> &operator-=(const Matrix<T> &matrix);
 
@@ -64,6 +66,10 @@ namespace segm
         Matrix<T> trimCols(int begin, int end) const;
         Matrix<T> trimRows(int begin, int end) const;
 
+        void swap(Matrix<T> &matrix) {
+            std::swap((*this), matrix);
+        }
+
         T sum() const;
 
     protected:
@@ -76,7 +82,7 @@ namespace segm
 
     private:
 
-        void checkDimensions(int _row, int _col, const char *msg);
+        void checkDimensions(int _row, int _col, const char *msg) const;
 
     };
 
@@ -152,6 +158,33 @@ namespace segm
         setFeats(matrix.getFeats());
 
         return (*this);
+    }
+
+    template<typename T>
+    Matrix<T> Matrix<T>::operator+(const Matrix<T> &matrix) const
+    {
+        Matrix<T> out(row, col);
+        checkDimensions(matrix.getRow(), matrix.getCol(),
+                        "Matrix dimensions must match for addition");
+
+        for (int i = 0; i < row * col; i++)
+            out(i) = feat[i] + matrix(i);
+
+        return out;
+    }
+
+    template<typename T>
+    Matrix<T> Matrix<T>::operator-(const Matrix<T> &matrix) const
+    {
+        Matrix<T> out(row, col);
+        checkDimensions(matrix.getRow(), matrix.getCol(),
+                        "Matrix dimensions must match for subtraction");
+
+        for (int i = 0; i < row * col; i++)
+            out(i) = feat[i] - matrix(i);
+
+        return out;
+
     }
 
     template<typename T>
@@ -240,38 +273,38 @@ namespace segm
         return out;
     }
 
-    template<typename T>
-    void Matrix<T>::mult(const Matrix<T> &_B, Matrix<T> &out, bool A_transpose,
-                         bool B_transpose, float alpha) const
-    {
-        Matrix<T> A = ((A_transpose) ? this->t() : (*this));
-        Matrix<T> B = ((B_transpose) ? _B.t() : _B);
-
-        if (A.getRow() != out.getRow() || B.getCol() != out.getCol())
-            throw std::runtime_error("Dimensions of output matrix (" + std::to_string(out.getRow()) + ", " +
-                                     std::to_string(out.getCol()) + ") doesn't match A (" + std::to_string(row) +
-                                     ", " + std::to_string(col) + ((A_transpose) ? ")^T" : ")") + "and B (" +
-                                     std::to_string(_B.getRow()) + ",  " + std::to_string(_B.getCol()) +
-                                     ((B_transpose) ? ")^T" : ")"));
-
-        if (A.getCol() != B.getRow())
-            throw std::runtime_error("Cannot multiply matrices A is (" + std::to_string(row) + ", " +
-                                     std::to_string(col) + ((A_transpose) ? ")^T" : ")") + "and B is (" +
-                                     std::to_string(_B.getRow()) + ",  " + std::to_string(_B.getCol()) +
-                                     ((B_transpose) ? ")^T" : ")"));
-
-        #ifdef _OPENMP
-            #pragma omp parallel for
-        #endif
-        for (int i = 0; i < A.getRow(); i++) {
-            for (int j = 0; j < B.getCol(); j++) {
-                out(i, j) = 0;
-                for (int k = 0; k < A.getCol(); k++) {
-                    out(i, j) += alpha * A(i, k) * B(k, j);
-                }
-            }
-        }
-    }
+//    template<typename T>
+//    void Matrix<T>::mult(const Matrix<T> &_B, Matrix<T> &out, bool A_transpose,
+//                         bool B_transpose, float alpha) const
+//    {
+//        Matrix<T> A = ((A_transpose) ? this->t() : (*this));
+//        Matrix<T> B = ((B_transpose) ? _B.t() : _B);
+//
+//        if (A.getRow() != out.getRow() || B.getCol() != out.getCol())
+//            throw std::runtime_error("Dimensions of output matrix (" + std::to_string(out.getRow()) + ", " +
+//                                     std::to_string(out.getCol()) + ") doesn't match A (" + std::to_string(row) +
+//                                     ", " + std::to_string(col) + ((A_transpose) ? ")^T" : ")") + "and B (" +
+//                                     std::to_string(_B.getRow()) + ",  " + std::to_string(_B.getCol()) +
+//                                     ((B_transpose) ? ")^T" : ")"));
+//
+//        if (A.getCol() != B.getRow())
+//            throw std::runtime_error("Cannot multiply matrices A is (" + std::to_string(row) + ", " +
+//                                     std::to_string(col) + ((A_transpose) ? ")^T" : ")") + "and B is (" +
+//                                     std::to_string(_B.getRow()) + ",  " + std::to_string(_B.getCol()) +
+//                                     ((B_transpose) ? ")^T" : ")"));
+//
+//        #ifdef _OPENMP
+//            #pragma omp parallel for
+//        #endif
+//        for (int i = 0; i < A.getRow(); i++) {
+//            for (int j = 0; j < B.getCol(); j++) {
+//                out(i, j) = 0;
+//                for (int k = 0; k < A.getCol(); k++) {
+//                    out(i, j) += alpha * A(i, k) * B(k, j);
+//                }
+//            }
+//        }
+//    }
 
     template<typename T>
     Matrix<T> Matrix<T>::mult(const Matrix<T> &B, bool A_transpose,
@@ -355,7 +388,7 @@ namespace segm
     }
 
     template<typename T>
-    void Matrix<T>::checkDimensions(int _row, int _col, const char *msg) {
+    void Matrix<T>::checkDimensions(int _row, int _col, const char *msg) const {
         if (row != _row || _col != col)
             throw std::invalid_argument(msg);
     }
