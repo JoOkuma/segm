@@ -7,22 +7,17 @@
 
 void pca_test()
 {
-    double array[8] = {5, 2,
-                       3, 4,
-                       5, 6,
-                       7, 8};
+    Eigen::MatrixXd input(4, 2);
+    input << 5, 2,
+             3, 4,
+             5, 6,
+             7, 8;
 
-    segm::Matrix<double> input(4, 2, array);
+    Eigen::MatrixXd pca = segm::PCA(input, 1);
 
-    segm::Matrix<double> pca = segm::PCA(input, 1);
+    double res_pca[2] = {0.4472136, 0.89442719};
 
-    double array_pca[2] = {-0.4472136, -0.89442719};
-
-    segm::Matrix<double> res_pca(1, 2, array_pca);
-
-    for (int i = 0; i < pca.getRow(); i++) {
-        for (int j = 0; j < pca.getRow(); j++) {
-            ASSERT_THROW((fabs(pca(i, j) - res_pca(i, j)) < 1e-5))
-        }
+    for (int i = 0; i < pca.cols(); i++) {
+        ASSERT_THROW((fabs(pca(0, i) - res_pca[i]) < 1e-5))
     }
 }

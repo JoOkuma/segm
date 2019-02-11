@@ -2,7 +2,9 @@
 #ifndef SEGM_NEIGHCOMPANALYSIS_H
 #define SEGM_NEIGHCOMPANALYSIS_H
 
-#include "datatypes/matrix.h"
+#include <eigen3/Eigen/Dense>
+
+using namespace Eigen;
 
 namespace segm {
 
@@ -10,19 +12,19 @@ namespace segm {
 
     public:
 
-        NeighborCompAnalysis(Matrix<float> &data, Vector<int> &label, int output_dim, int _iterations = 10000,
+        NeighborCompAnalysis(MatrixXd &data, VectorXi &label, int output_dim, int _iterations = 10000,
                              double _learn_rate = 1e-2, bool _verbose = false);
 
-        Matrix<float> transform(const Matrix<float> &data) const;
-        Matrix<double> transform(const Matrix<double> &data) const;
+        MatrixXf transform(const MatrixXf &data) const;
+        MatrixXd transform(const MatrixXd &data) const;
 
         void train();
 
     private:
 
-        Matrix<float> &data;
-        Vector<int> &label;
-        Matrix<double> L;
+        MatrixXd &data;
+        VectorXi &label;
+        MatrixXd L;
 
         int size;       // input data length
         int d_in;       // input dimension
@@ -32,8 +34,6 @@ namespace segm {
         int iterations = 10000;
         bool verbose = false;
         bool executed = false;
-
-        double transSqrL2Norm(Vector<double> &array, Matrix<double> &L, Vector<double> &buffer);
 
     };
 }

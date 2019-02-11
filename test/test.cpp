@@ -11,7 +11,6 @@ int main()
     heap_test();
     gaussian_test();
     pca_test();
-    svd_test();
     largemargin_test();
     watercut_test();
     color_test();

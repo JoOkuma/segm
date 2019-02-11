@@ -1,16 +1,20 @@
 
 #include "statistics.h"
 
+using namespace Eigen;
+
 namespace segm {
 
-    Matrix<double> PCA(Matrix<double> &data, int dimension_out) {
-        int dim_in = data.getCol();
-        int n = data.getRow();
+    template <typename T>
+    Matrix<T, Dynamic, Dynamic> PCA(Matrix<T, Dynamic, Dynamic> &data, int dimension_out)
+    {
+        long dim_in = data.cols();
+        long n = data.rows();
 
         if (dimension_out > dim_in)
             throw std::invalid_argument("PCA output dimension cannot be greater than input dimension");
 
-        Vector<double> mean(n);
+        Matrix<T, Dynamic, 1> mean(n);
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < dim_in; j++) {
@@ -20,7 +24,7 @@ namespace segm {
 
         mean /= n;
 
-        Matrix<double> centralized(n, dim_in);
+        Matrix<T, Dynamic, Dynamic> centralized(n, dim_in);
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < dim_in; j++) {
@@ -28,57 +32,20 @@ namespace segm {
             }
         }
 
-        Matrix<double> cov = centralized.mult(centralized, true, false, 1.0f / (n - 1));
+//        Matrix<T, Dynamic, Dynamic> cov = centralized.transpose() * centralized();
+        Matrix<T, Dynamic, Dynamic> cov = centralized.transpose().lazyProduct(centralized);
+        cov *= (1.0 / (n - 1));
 
-        Vector<double> S(cov.getRow());
-        Matrix<double> U(cov.getRow(), cov.getRow());
-        Matrix<double> Vt(cov.getCol(), cov.getCol());
+        BDCSVD<Matrix<T, Dynamic, Dynamic>> svd(cov, ComputeFullV);
 
-        SVD(cov, U, S, Vt);
+        Matrix<T, Dynamic, Dynamic> V = svd.matrixV();
+        V.conservativeResize(dimension_out, dim_in);
 
-        return Vt.trimRows(0, dimension_out);
+        return V;
     }
 
-
-    Matrix<float> PCA(Matrix<float> &data, int dimension_out) {
-        int dim_in = data.getCol();
-        int n = data.getRow();
-
-        if (dimension_out > dim_in)
-            throw std::invalid_argument("PCA output dimension cannot be greater than input dimension");
-
-        Vector<float> mean(n);
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < dim_in; j++) {
-                mean[j] += data(i, j);
-            }
-        }
-
-        mean /= n;
-
-        Matrix<float> centralized(n, dim_in);
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < dim_in; j++) {
-                centralized(i, j) = data(i, j) - mean[j];
-            }
-        }
-
-        Matrix<float> cov = centralized.mult(centralized, true, false, 1.0f / (n - 1));
-
-        Vector<float> S(cov.getRow());
-        Matrix<float> U(cov.getRow(), cov.getRow());
-        Matrix<float> Vt(cov.getCol(), cov.getCol());
-
-        SVD(cov, U, S, Vt);
-
-        return Vt.trimRows(0, dimension_out);
-    }
-
-
-    Vector<int> randomIndexes(int size) {
-        Vector<int> index(size);
+    VectorXi randomIndexes(int size) {
+        VectorXi index(size);
         for (int i = 0; i < size; i++)
             index[i] = i;
 
@@ -91,4 +58,7 @@ namespace segm {
         return index;
     }
 
+
+    template Matrix<float, Dynamic, Dynamic> PCA(Matrix<float, Dynamic, Dynamic> &data, int dimension_out);
+    template Matrix<double, Dynamic, Dynamic> PCA(Matrix<double, Dynamic, Dynamic> &data, int dimension_out);
 }

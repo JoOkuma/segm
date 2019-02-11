@@ -6,8 +6,6 @@ add_executable(main_test
         imgproc/gaussiantest.h
         math/pcatest.cpp
         math/pcatest.h
-        math/svdtest.cpp
-        math/svdtest.h
         metriclearn/largemargintest.cpp
         metriclearn/largemargintest.h
         segmentation/watercuttest.cpp

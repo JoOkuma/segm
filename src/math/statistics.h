@@ -2,7 +2,9 @@
 #ifndef SEGM_STATISTICS_H
 #define SEGM_STATISTICS_H
 
-#include "math/linearalgebra.h"
+#include <eigen3/Eigen/Dense>
+
+using namespace Eigen;
 
 namespace segm {
 
@@ -12,11 +14,10 @@ namespace segm {
      * @return                  PCA rotation matrix, (dimension_out, n) with principal components vectors on rows
      */
 
-    Matrix<double> PCA(Matrix<double> &data, int dimension_out);
+    template <typename T>
+    Matrix<T, Dynamic, Dynamic> PCA(Matrix<T, Dynamic, Dynamic> &data, int dimension_out);
 
-    Matrix<float> PCA(Matrix<float> &data, int dimension_out);
-
-    Vector<int> randomIndexes(int size);
+    VectorXi randomIndexes(int size);
 
 }
 

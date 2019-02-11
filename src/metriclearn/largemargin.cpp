@@ -10,12 +10,13 @@
 #include "omp.h"
 #endif
 
+using namespace Eigen;
 using namespace segm;
 
-LargeMargin::LargeMargin(const Matrix<float> &_data, Vector<int> &_label, int output_dim, int _k_targets, int _k_impostors,
+LargeMargin::LargeMargin(const MatrixXf &_data, VectorXi &_label, int output_dim, int _k_targets, int _k_impostors,
                          int _iterations, double _learn_rate, bool _verbose) :
-        label(_label), L(output_dim, _data.getCol()), size(_data.getRow()), d_in(_data.getCol()), d_out(output_dim),
-        k_targets(_k_targets), k_impostors(_k_impostors), initial_learn_rate(_learn_rate),
+        label(_label), L(output_dim, _data.cols()), size(static_cast<int>(_data.rows())), d_in(static_cast<int>(_data.cols())),
+        d_out(output_dim), k_targets(_k_targets), k_impostors(_k_impostors), initial_learn_rate(_learn_rate),
         iterations(_iterations), verbose(_verbose)
 {
 
@@ -23,38 +24,34 @@ LargeMargin::LargeMargin(const Matrix<float> &_data, Vector<int> &_label, int ou
 }
 
 
-LargeMargin::~LargeMargin()
+void LargeMargin::train(const MatrixXf &_data)
 {
-}
-
-void LargeMargin::train(const Matrix<float> &_data)
-{
-    data = new Matrix<double>(_data.convert<double>());
-    L = Matrix<double>(PCA(*data, d_out));
+    data = new MatrixXd(_data.cast<double>());
+    L = MatrixXd(PCA(*data, d_out));
 
     createDistTable(data);
 
     if (verbose && dist_table_computed)
         std::cout << "Distance matrix computed" << std::endl;
 
-    Matrix<int> target = findTargets();
-    Matrix<double> target_grad = computeTargetGrad(target);
+    MatrixXi target = findTargets();
+    MatrixXd target_grad = computeTargetGrad(target);
 
     if (verbose)
         std::cout << "Target neighbours found and target static gradient computed" << std::endl;
 
-    Matrix<double> next_L(L);
-    Matrix<double> next_Ldata = data->mult(L, false, true);
+    MatrixXd next_L(L);
+    MatrixXd next_Ldata = transform(*data);
 
     createDistTable(&next_Ldata);
 
     std::vector<LargeMargin::impSet> impostors = findImpostors(target);
-    Matrix<double> imp_grad = computeImpGrad(impostors);
+    MatrixXd imp_grad = computeImpGrad(impostors);
 
     /* buffers */
-    Matrix<double> next_imp_grad(d_in, d_in);
-    Matrix<double> gradient(d_in, d_in);
-    Matrix<double> grad_prod(d_out, d_in);
+    MatrixXd next_imp_grad(d_in, d_in);
+    MatrixXd gradient(d_in, d_in);
+    MatrixXd grad_prod(d_out, d_in);
 
     const double epsilon = 1e-7;
     const double min_learn_rate = 1e-22;
@@ -67,7 +64,7 @@ void LargeMargin::train(const Matrix<float> &_data)
         ite++;
         do {
             updateTransform(target_grad, imp_grad, gradient, grad_prod, next_L);
-            transform(*data, next_L, next_Ldata);
+            next_Ldata.noalias() = data->lazyProduct(next_L.transpose());
             createDistTable(&next_Ldata);
 
             std::vector<LargeMargin::impSet> next_imp = findImpostors(target);
@@ -102,10 +99,11 @@ void LargeMargin::train(const Matrix<float> &_data)
              && fabs(delta) > epsilon && current_learn_rate > min_learn_rate);
 
     delete[] dist_table;
+    delete data;
 }
 
 
-void LargeMargin::createDistTable(Matrix<double> *current)
+void LargeMargin::createDistTable(MatrixXd *current)
 {
     current_data = current;
 
@@ -126,7 +124,7 @@ void LargeMargin::createDistTable(Matrix<double> *current)
     for (int i = 1; i < size; i++) {
         int row_id = (i * (i - 1)) / 2;
         for (int j = 0; j < i; j++) {
-            dist_table[row_id + j] = squaredl2norm(current->getFeats(i), current->getFeats(j), current->getCol());
+            dist_table[row_id + j] = squaredNorm(current->row(i), current->row(j));
         }
     }
 
@@ -142,7 +140,7 @@ double LargeMargin::distance(int i, int j)
     if (i == j) return std::numeric_limits<double>::max();
 
     if (!dist_table_computed)
-        return squaredl2norm(current_data->getFeats(i), current_data->getFeats(j), current_data->getCol());
+        return squaredNorm(current_data->row(i), current_data->row(j));
 
     int greater = (i > j) ? i : j;
     int lower = (i > j) ? j : i;
@@ -151,15 +149,15 @@ double LargeMargin::distance(int i, int j)
 }
 
 
-Matrix<int> LargeMargin::findTargets()
+MatrixXi LargeMargin::findTargets()
 {
-    Vector<double> max_dist(size);
-    Matrix<int> target(size, k_targets);
-    Matrix<double> target_dist(size, k_targets);
+    VectorXd max_dist(size);
+    MatrixXi target(size, k_targets);
+    MatrixXd target_dist(size, k_targets);
 
-    target_dist = std::numeric_limits<double>::max();
-    target = -1;
-    max_dist = std::numeric_limits<double>::max();
+    target_dist.setConstant(std::numeric_limits<double>::max());
+    target.setConstant(-1);
+    max_dist.setConstant(std::numeric_limits<double>::max());
 
     int last = k_targets - 1;
     for (int i = 0; i < size; i++) {
@@ -216,9 +214,9 @@ void LargeMargin::checkKTargets()
     delete[] lab_count;
 }
 
-Matrix<double> LargeMargin::computeTargetGrad(const Matrix<int> &target)
+MatrixXd LargeMargin::computeTargetGrad(const MatrixXi &target)
 {
-    Matrix<double> target_grad(d_in, d_in);
+    MatrixXd target_grad(d_in, d_in);
 
     #ifdef _OPENMP
         #pragma omp parallel for
@@ -241,7 +239,7 @@ Matrix<double> LargeMargin::computeTargetGrad(const Matrix<int> &target)
     return target_grad;
 }
 
-std::vector<LargeMargin::impSet> LargeMargin::findImpostors(const Matrix<int> &target)
+std::vector<LargeMargin::impSet> LargeMargin::findImpostors(const MatrixXi &target)
 {
     #ifndef _OPENMP
     unsigned long n_threads = 1;
@@ -321,9 +319,9 @@ void LargeMargin::findDifference(const std::vector<LargeMargin::impSet> &imposto
     }
 }
 
-Matrix<double> LargeMargin::computeImpGrad(const std::vector<LargeMargin::impSet> &impostors)
+MatrixXd LargeMargin::computeImpGrad(const std::vector<LargeMargin::impSet> &impostors)
 {
-    Matrix<double> imp_grad(d_in, d_in);
+    MatrixXd imp_grad(d_in, d_in);
 
     #ifdef _OPENMP
         #pragma omp parallel for
@@ -356,7 +354,7 @@ Matrix<double> LargeMargin::computeImpGrad(const std::vector<LargeMargin::impSet
 }
 
 
-void LargeMargin::computeImpGrad(const Matrix<double> &imp_grad, Matrix<double> &next_imp_grad,
+void LargeMargin::computeImpGrad(const MatrixXd &imp_grad, MatrixXd &next_imp_grad,
                                  const std::vector<LargeMargin::impSet> &missing,
                                  const std::vector<LargeMargin::impSet> &extra)
 {
@@ -411,27 +409,26 @@ void LargeMargin::computeImpGrad(const Matrix<double> &imp_grad, Matrix<double> 
 }
 
 
-void LargeMargin::updateTransform(const Matrix<double> &target_grad, const Matrix<double> &imp_grad,
-                                  Matrix<double> &gradient, Matrix<double> &grad_prod, Matrix<double> &next_L)
+void LargeMargin::updateTransform(const MatrixXd &target_grad, const MatrixXd &imp_grad,
+                                  MatrixXd &gradient, MatrixXd &grad_prod, MatrixXd &next_L)
 {
-    for (int i = 0; i < d_in * d_in; i++) {
-        gradient(i) = target_grad(i) + imp_grad(i);
-    }
+    gradient.noalias() = target_grad + imp_grad;
 
-    L.mult(gradient, grad_prod);
-    for (int i = 0; i < d_in * d_out; i++) {
-        next_L(i) = L(i) - 2 * current_learn_rate * grad_prod(i);
-    }
+    grad_prod.noalias() = L * gradient;
+
+    grad_prod *= 2 * current_learn_rate;
+
+    next_L.noalias() = L - grad_prod;
 }
 
-double LargeMargin::gradLoss(const Matrix<double> &grad, const Matrix<double> &L_trans)
+double LargeMargin::gradLoss(const MatrixXd &grad, const MatrixXd &L_trans)
 {
-    Matrix<double> M = L_trans.mult(L_trans, true, false);
+    MatrixXd M = L_trans.transpose().lazyProduct(L_trans);
 
     double loss = 0.0f;
-    for (int i = 0; i < d_in * d_in; i++) {
-        loss += M(i) * grad(i);
-    }
+    for (int i = 0; i < d_in; i++)
+        for (int j = 0; j < d_in; j++)
+            loss += M(i, j) * grad(i, j);
 
     return loss;
 }

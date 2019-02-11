@@ -7,16 +7,16 @@
 
 using namespace segm;
 
-NeighborCompAnalysis::NeighborCompAnalysis(Matrix<float> &_data, Vector<int> &_label, int output_dim,
+NeighborCompAnalysis::NeighborCompAnalysis(MatrixXd &_data, VectorXi &_label, int output_dim,
                                            int _iterations, double _learn_rate, bool _verbose) :
         data(_data),
         label(_label),
-        L(output_dim, data.getCol()),
-        size(data.getRow()),
-        d_in(data.getCol()),
+        L(output_dim, data.cols()),
+        size(static_cast<int>(data.rows())),
+        d_in(static_cast<int>(data.cols())),
         d_out(output_dim)
 {
-    if (data.getRow() != label.getSize())
+    if (data.rows() != label.rows())
         throw std::invalid_argument("Number of samples on data and label must be the same");
 
     if (d_out > d_in)
@@ -27,44 +27,43 @@ NeighborCompAnalysis::NeighborCompAnalysis(Matrix<float> &_data, Vector<int> &_l
     verbose = _verbose;
     executed = false;
 
-    Matrix<double> tmp_data = data.convert<double>();
-    L = PCA(tmp_data, output_dim);
+    L = PCA(data, output_dim);
 }
 
 
-Matrix<float> NeighborCompAnalysis::transform(const Matrix<float> &data) const
+MatrixXf NeighborCompAnalysis::transform(const MatrixXf &data) const
 {
     if (!executed)
         throw std::runtime_error("Neighborhood Component Analysis must"
                                  "be executed before transforming space");
 
-    return data.mult(L.convert<float>(), false, true);
+    return data * L.cast<float>().transpose();
 }
 
 
-Matrix<double> NeighborCompAnalysis::transform(const Matrix<double> &data) const
+MatrixXd NeighborCompAnalysis::transform(const MatrixXd &data) const
 {
     if (!executed)
         throw std::runtime_error("Neighborhood Component Analysis must"
                                  "be executed before transforming space");
 
-    return data.mult(L, false, true);
+    return data * L.transpose();
 }
 
 
 void NeighborCompAnalysis::train()
 {
 
-    Vector<int> idx = randomIndexes(size);
+    VectorXi idx = randomIndexes(size);
 
-    Vector<double> softmax(size);
+    VectorXd softmax(size);
 
-    Vector<double> diff(d_in);
-    Vector<double> Lx_buffer(d_out);
+    VectorXd diff(d_in);
+    VectorXd Lx_buffer(d_out);
 
-    Matrix<double> first(d_in, d_in);
-    Matrix<double> second(d_in, d_in);
-    Matrix<double> grad(d_out, d_in);
+    MatrixXd first(d_in, d_in);
+    MatrixXd second(d_in, d_in);
+    MatrixXd grad(d_out, d_in);
 
     for (int ite = 0; ite < iterations; ite++)
     {
@@ -77,11 +76,10 @@ void NeighborCompAnalysis::train()
                 continue;
             }
 
-            for (int j = 0; j < d_in; j++) {
-                diff[j] = data(i, j) - data(k, j);
-            }
+            diff.noalias() = data.row(i) - data.row(k);
+            Lx_buffer.noalias() = L * diff;
 
-            softmax[k] = transSqrL2Norm(diff, L, Lx_buffer);
+            softmax[k] = diff.squaredNorm();
             softmax_norm += softmax[k];
         }
 
@@ -93,8 +91,8 @@ void NeighborCompAnalysis::train()
                 p_ik += softmax[k];
         }
 
-        first = 0.0;
-        second = 0.0;
+        first.setConstant(0.0);
+        second.setConstant(0.0);
 
         for (int di = 0; di < d_in; di++) {
             for (int dj = 0; dj < d_in; dj++) {
@@ -114,27 +112,13 @@ void NeighborCompAnalysis::train()
             }
         }
 
-        for (int j = 0; j < d_in * d_in; j++)
-            first(j) = first(j) * p_ik - second(j);
+        for (int j = 0; j < d_in; j++)
+            for (int k = 0; k < d_in; k++)
+                first(j, k) = first(j, k) * p_ik - second(j, k);
 
-        L.mult(first, grad, false, false, 2 * learn_rate);
+        grad.noalias() = L * first;
+        L *= 2 * learn_rate;
 
         L += grad;
     }
 }
-
-
-double NeighborCompAnalysis::transSqrL2Norm(Vector<double> &array, Matrix<double> &L, Vector<double> &buffer)
-{
-    double norm = 0.0;
-
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, 1, d_out, d_in, 1.0, array.getFeats(),
-                d_in, L.getFeats(), d_in, 0.0, buffer.getFeats(), d_out);
-
-    for (int i = 0; i < d_out; i++) {
-        norm += buffer[i] * buffer[i];
-    }
-
-    return norm;
-}
-
