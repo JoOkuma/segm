@@ -12,34 +12,22 @@ ForestingTransform::ForestingTransform(int width, int height, int bands) :
         cost(width, height),
         root(width, height),
         pred(width, height),
-        label(width, height)
-{
-
-}
+        label(width, height),
+        order(width, height) { }
 
 
 ForestingTransform::ForestingTransform(int width, int height, int bands, const float *feats) :
-        Image<float>(width, height, bands, feats),
-        heap(w, h),
-        cost(w, h),
-        root(w, h),
-        pred(w, h),
-        label(w, h)
-{
+        ForestingTransform(width, height, bands) {
+    setFeats(feats);
 }
+
 
 ForestingTransform::~ForestingTransform()
 {
-
 }
 
-void ForestingTransform::setFeats(const float *feats)
-{
-    for (int i = 0; i < w * h * b; i++)
-        feat[i] = feats[i];
-}
 
-void ForestingTransform::run(Image<int> &markers, int plato)
+void ForestingTransform::run(Image<int> &markers, float plato)
 {
     if (markers.getWidth() != w || markers.getHeight() != h)
         throw std::invalid_argument("Marker image and original must have same dimensions");
@@ -55,9 +43,13 @@ void ForestingTransform::run(Image<int> &markers, int plato)
         }
     }
 
+    int count = 0;
     while(!heap.isEmpty())
     {
         int p = heap.pop();
+
+        order(p) = count;
+        count++;
 
         if (root(p) == p) {
             // TODO
@@ -86,12 +78,14 @@ Image<float> ForestingTransform::getCost() const
     return cost.copy();
 }
 
+
 Image<int> ForestingTransform::getRoot() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting roots");
     return root.copy();
 }
+
 
 Image<int> ForestingTransform::getPred() const
 {
@@ -100,12 +94,22 @@ Image<int> ForestingTransform::getPred() const
     return pred.copy();
 }
 
+
 Image<int> ForestingTransform::getLabel() const
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting labels");
     return label.copy();
 }
+
+
+Image<int> ForestingTransform::getOrder() const
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before getting order");
+    return order.copy();
+}
+
 
 Image<int> ForestingTransform::getPredCount() const
 {
@@ -123,6 +127,7 @@ Image<int> ForestingTransform::getPredCount() const
 
     return count;
 }
+
 
 Image<int> ForestingTransform::getLeafPredCount() const
 {
@@ -156,6 +161,7 @@ Image<int> ForestingTransform::getLeafPredCount() const
     return count;
 }
 
+
 void ForestingTransform::reset()
 {
     heap.reset();
@@ -165,6 +171,7 @@ void ForestingTransform::reset()
         pred(p)  = nil;
         root(p)  = nil;
         label(p) = nil;
+        order(p) = nil;
     }
 
     heap.setValues(cost.getFeats());

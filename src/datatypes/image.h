@@ -77,6 +77,7 @@ namespace segm {
         inline bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
 
         Image<T> copy() const;
+		void fill(T value);
 
         T max() const;
         T min() const;
@@ -263,6 +264,12 @@ namespace segm {
         out.setFeats(feat);
         return out;
     }
+
+	template<typename T>
+	void Image<T>::fill(T value) {
+		for (int i = 0; i < w * h * b; i++)
+			feat[i] = value;
+	}
 
     template<typename T>
     T Image<T>::max() const {

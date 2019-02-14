@@ -21,7 +21,7 @@ set(SOURCE_FILES
 add_library(segm ${SOURCE_FILES})
 
 find_package(Eigen3 REQUIRED)
-target_include_directories(segm PRIVATE ${EIGEN3_INCLUDES_DIR})
+target_include_directories(segm PRIVATE Eigen3::Eigen)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)

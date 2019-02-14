@@ -16,14 +16,13 @@ namespace segm
                 ForestingTransform(image.getWidth(), image.getHeight(), image.getBands(), image.getFeats()) { }
         ~ForestingTransform() override;
 
-        void setFeats(const float *feats);
-
-        void run(Image<int> &markers, int height = 1);
+        void run(Image<int> &markers, float plato = 0.01f);
 
         Image<float> getCost() const;
         Image<int> getRoot() const;
         Image<int> getPred() const;
         Image<int> getLabel() const;
+        Image<int> getOrder() const;
 
         Image<int> getPredCount() const;
         Image<int> getLeafPredCount() const;
@@ -36,6 +35,7 @@ namespace segm
         Image<int> root;
         Image<int> pred;
         Image<int> label;
+        Image<int> order;
 
         bool executed = false;
 
