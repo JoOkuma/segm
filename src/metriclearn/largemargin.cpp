@@ -13,23 +13,22 @@
 using namespace Eigen;
 using namespace segm;
 
-LargeMargin::LargeMargin(const MatrixXf &_data, VectorXi &_label, int output_dim, int _k_targets, int _k_impostors,
+LargeMargin::LargeMargin(MatrixXd &_data, VectorXi &_label, int output_dim, int _k_targets, int _k_impostors,
                          int _iterations, double _learn_rate, bool _verbose) :
-        label(_label), L(output_dim, _data.cols()), size(static_cast<int>(_data.rows())), d_in(static_cast<int>(_data.cols())),
-        d_out(output_dim), k_targets(_k_targets), k_impostors(_k_impostors), initial_learn_rate(_learn_rate),
-        iterations(_iterations), verbose(_verbose)
+        data(_data), label(_label), L(output_dim, _data.cols()), size(static_cast<int>(_data.rows())),
+        d_in(static_cast<int>(_data.cols())), d_out(output_dim), k_targets(_k_targets), k_impostors(_k_impostors),
+        initial_learn_rate(_learn_rate), iterations(_iterations), verbose(_verbose)
 {
 
     checkKTargets();
 }
 
 
-void LargeMargin::train(const MatrixXf &_data)
+void LargeMargin::train()
 {
-    data = new MatrixXd(_data.cast<double>());
-    L = MatrixXd(PCA(*data, d_out));
+    L = MatrixXd(PCA(data, d_out));
 
-    createDistTable(data);
+    createDistTable(&data);
 
     if (verbose && dist_table_computed)
         std::cout << "Distance matrix computed" << std::endl;
@@ -41,7 +40,7 @@ void LargeMargin::train(const MatrixXf &_data)
         std::cout << "Target neighbours found and target static gradient computed" << std::endl;
 
     MatrixXd next_L(L);
-    MatrixXd next_Ldata = transform(*data);
+    MatrixXd next_Ldata = transform(data);
 
     createDistTable(&next_Ldata);
 
@@ -64,7 +63,7 @@ void LargeMargin::train(const MatrixXf &_data)
         ite++;
         do {
             updateTransform(target_grad, imp_grad, gradient, grad_prod, next_L);
-            next_Ldata.noalias() = data->lazyProduct(next_L.transpose());
+            next_Ldata.noalias() = data.lazyProduct(next_L.transpose());
             createDistTable(&next_Ldata);
 
             std::vector<LargeMargin::impSet> next_imp = findImpostors(target);
@@ -99,7 +98,6 @@ void LargeMargin::train(const MatrixXf &_data)
              && fabs(delta) > epsilon && current_learn_rate > min_learn_rate);
 
     delete[] dist_table;
-    delete data;
 }
 
 
@@ -207,7 +205,7 @@ void LargeMargin::checkKTargets()
 
     if (min <  k_targets) {
         k_targets = min;
-        std::cout << "Number of classes reduced to " << min << ", number of samples"
+        std::cout << "Number of neighbors reduced to " << min << ", number of samples "
                 "with same class not sufficient." << std::endl;
     }
 
@@ -227,10 +225,10 @@ MatrixXd LargeMargin::computeTargetGrad(const MatrixXi &target)
                 for (int k = 0; k < k_targets; k++)
                 {
                     int tk = target(i, k);
-                    target_grad(di, dj) += + (*data)(i, di) *  (*data)(i, dj)
-                                           + (*data)(tk, di) * (*data)(tk, dj)
-                                           - (*data)(i, di) *  (*data)(tk, dj)
-                                           - (*data)(tk, di) * (*data)(i, dj);
+                    target_grad(di, dj) += + data(i, di)  * data(i, dj)
+                                           + data(tk, di) * data(tk, dj)
+                                           - data(i, di)  * data(tk, dj)
+                                           - data(tk, di) * data(i, dj);
                 }
             }
         }
@@ -336,16 +334,16 @@ MatrixXd LargeMargin::computeImpGrad(const std::vector<LargeMargin::impSet> &imp
                 int tk = s.target;
 
                 /* impostors */
-                imp_grad(di, dj) += - (*data)(e, di) * (*data)(e, dj)
-                                    - (*data)(ik, di) * (*data)(ik, dj)
-                                    + (*data)(e, di) * (*data)(ik, dj)
-                                    + (*data)(ik, di) * (*data)(e, dj);
+                imp_grad(di, dj) += - data(e, di)  * data(e, dj)
+                                    - data(ik, di) * data(ik, dj)
+                                    + data(e, di)  * data(ik, dj)
+                                    + data(ik, di) * data(e, dj);
 
                 /* target */
-                imp_grad(di, dj) += + (*data)(e, di) * (*data)(e, dj)
-                                    + (*data)(tk, di) * (*data)(tk, dj)
-                                    - (*data)(e, di) * (*data)(tk, dj)
-                                    - (*data)(tk, di) * (*data)(e, dj);
+                imp_grad(di, dj) += + data(e, di)  * data(e, dj)
+                                    + data(tk, di) * data(tk, dj)
+                                    - data(e, di)  * data(tk, dj)
+                                    - data(tk, di) * data(e, dj);
             }
         }
     }
@@ -373,16 +371,16 @@ void LargeMargin::computeImpGrad(const MatrixXd &imp_grad, MatrixXd &next_imp_gr
                 int tk = s.target;
 
                 /* impostors */
-                next_imp_grad(di, dj) += - (*data)(e, di) * (*data)(e, dj)
-                                         - (*data)(ik, di) * (*data)(ik, dj)
-                                         + (*data)(e, di) * (*data)(ik, dj)
-                                         + (*data)(ik, di) * (*data)(e, dj);
+                next_imp_grad(di, dj) += - data(e, di) * data(e, dj)
+                                         - data(ik, di) * data(ik, dj)
+                                         + data(e, di) * data(ik, dj)
+                                         + data(ik, di) * data(e, dj);
 
                 /* target */
-                next_imp_grad(di, dj) += + (*data)(e, di) * (*data)(e, dj)
-                                         + (*data)(tk, di) * (*data)(tk, dj)
-                                         - (*data)(e, di) * (*data)(tk, dj)
-                                         - (*data)(tk, di) * (*data)(e, dj);
+                next_imp_grad(di, dj) += + data(e, di) * data(e, dj)
+                                         + data(tk, di) * data(tk, dj)
+                                         - data(e, di) * data(tk, dj)
+                                         - data(tk, di) * data(e, dj);
             }
 
             /* subtracting */
@@ -392,16 +390,16 @@ void LargeMargin::computeImpGrad(const MatrixXd &imp_grad, MatrixXd &next_imp_gr
                 int tk = s.target;
 
                 /* impostors */
-                next_imp_grad(di, dj) -= - (*data)(e, di) * (*data)(e, dj)
-                                         - (*data)(ik, di) * (*data)(ik, dj)
-                                         + (*data)(e, di) * (*data)(ik, dj)
-                                         + (*data)(ik, di) * (*data)(e, dj);
+                next_imp_grad(di, dj) -= - data(e, di) * data(e, dj)
+                                         - data(ik, di) * data(ik, dj)
+                                         + data(e, di) * data(ik, dj)
+                                         + data(ik, di) * data(e, dj);
 
                 /* target */
-                next_imp_grad(di, dj) -= + (*data)(e, di) * (*data)(e, dj)
-                                         + (*data)(tk, di) * (*data)(tk, dj)
-                                         - (*data)(e, di) * (*data)(tk, dj)
-                                         - (*data)(tk, di) * (*data)(e, dj);
+                next_imp_grad(di, dj) -= + data(e, di) * data(e, dj)
+                                         + data(tk, di) * data(tk, dj)
+                                         - data(e, di) * data(tk, dj)
+                                         - data(tk, di) * data(e, dj);
 
             }
         }

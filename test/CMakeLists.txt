@@ -8,6 +8,8 @@ add_executable(main_test
         math/pcatest.h
         metriclearn/largemargintest.cpp
         metriclearn/largemargintest.h
+        metriclearn/ncatest.cpp
+        metriclearn/ncatest.h
         segmentation/watercuttest.cpp
         segmentation/watercuttest.h
         utils/colortest.cpp

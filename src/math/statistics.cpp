@@ -50,7 +50,7 @@ namespace segm {
             index[i] = i;
 
         for (int i = 0; i < size; i++) {
-            int j = (int) (i + random() / (RAND_MAX / (size - 1) + 1));
+            int j = (int) (random() / (RAND_MAX / (size - 1) + 1));
             int tmp = index[j];
             index[j] = index[i];
             index[i] = tmp;

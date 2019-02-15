@@ -12,16 +12,16 @@ namespace segm
     class LargeMargin {
 
     public:
-        LargeMargin(const MatrixXf &data, VectorXi &label, int output_dim, int k_targets, int k_impostors = 100000,
+        LargeMargin(MatrixXd &data, VectorXi &label, int output_dim, int k_targets, int k_impostors = 100000,
                     int iterations = 1000, double learn_rate = 1e-7, bool verbose = false);
 
         template <typename T>
         Matrix<T, Dynamic, Dynamic> transform(const Matrix<T, Dynamic, Dynamic> &data) const
         { return data.lazyProduct(L.transpose()); }
 
-        void train(const MatrixXf &data);
+        void train();
 
-        void setLearningRate(float rate) { initial_learn_rate = rate; }
+        void setLearningRate(double rate) { initial_learn_rate = rate; }
 
         void setIteration(int ite) { iterations = ite; }
 
@@ -53,7 +53,7 @@ namespace segm
 
         } impSet;
 
-        MatrixXd *data;
+        MatrixXd &data;
         VectorXi &label;
 
         MatrixXd *current_data;

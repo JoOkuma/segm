@@ -2,13 +2,12 @@
 #include "neighborcompanalysis.h"
 #include "math/statistics.h"
 
-#include <cblas.h>
 #include <cmath>
 
 using namespace segm;
 
 NeighborCompAnalysis::NeighborCompAnalysis(MatrixXd &_data, VectorXi &_label, int output_dim,
-                                           int _iterations, double _learn_rate, bool _verbose) :
+                                           int _iterations, double _learn_rate) :
         data(_data),
         label(_label),
         L(output_dim, data.cols()),
@@ -24,7 +23,6 @@ NeighborCompAnalysis::NeighborCompAnalysis(MatrixXd &_data, VectorXi &_label, in
 
     iterations = _iterations;
     learn_rate = _learn_rate;
-    verbose = _verbose;
     executed = false;
 
     L = PCA(data, output_dim);
@@ -53,7 +51,6 @@ MatrixXd NeighborCompAnalysis::transform(const MatrixXd &data) const
 
 void NeighborCompAnalysis::train()
 {
-
     VectorXi idx = randomIndexes(size);
 
     VectorXd softmax(size);
@@ -79,7 +76,7 @@ void NeighborCompAnalysis::train()
             diff.noalias() = data.row(i) - data.row(k);
             Lx_buffer.noalias() = L * diff;
 
-            softmax[k] = diff.squaredNorm();
+            softmax[k] = exp(-Lx_buffer.squaredNorm());
             softmax_norm += softmax[k];
         }
 
@@ -104,9 +101,9 @@ void NeighborCompAnalysis::train()
                                - data(k, di) * data(i, dj);
 
                     x *= softmax[k];
-                    first(i, dj) += x;
+                    first(di, dj) += x;
                     if (label[k] == label[i]) {
-                        second(i, dj) += x;
+                        second(di, dj) += x;
                     }
                 }
             }
@@ -121,4 +118,6 @@ void NeighborCompAnalysis::train()
 
         L += grad;
     }
+
+    executed = true;
 }

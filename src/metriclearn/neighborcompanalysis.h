@@ -13,12 +13,17 @@ namespace segm {
     public:
 
         NeighborCompAnalysis(MatrixXd &data, VectorXi &label, int output_dim, int _iterations = 10000,
-                             double _learn_rate = 1e-2, bool _verbose = false);
+                             double _learn_rate = 1e-2);
 
         MatrixXf transform(const MatrixXf &data) const;
         MatrixXd transform(const MatrixXd &data) const;
 
         void train();
+
+        void setLearningRate(double rate) { learn_rate = rate; }
+        void setIteration(int ite) { iterations = ite; }
+
+        MatrixXd getTransform() const { return L; }
 
     private:
 
@@ -32,7 +37,6 @@ namespace segm {
 
         double learn_rate = 1e-2;
         int iterations = 10000;
-        bool verbose = false;
         bool executed = false;
 
     };

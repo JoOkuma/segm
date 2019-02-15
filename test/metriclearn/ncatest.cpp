@@ -1,12 +1,12 @@
 #include <cmath>
 
 #include "test.h"
-#include "metriclearn/largemargin.h"
-#include "metriclearn/largemargintest.h"
+#include "metriclearn/neighborcompanalysis.h"
+#include "metriclearn/ncatest.h"
 
 // TODO FINISH THIS TEST
 
-void largemargin_test()
+void nca_test()
 {
     Eigen::MatrixXd X(150, 4);
     X <<    5.1,3.5,1.4,0.2,
@@ -165,16 +165,16 @@ void largemargin_test()
          1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
          2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2;
 
-    segm::LargeMargin model(X, y, 4, 25);
+    segm::NeighborCompAnalysis model(X, y, 4);
     model.train();
     Eigen::MatrixXd L = model.getTransform();
 
     Eigen::MatrixXd res_L(4, 4);
 
-    res_L << 0.105588,    0.198928,  0.635756,  0.514295,
-             0.0688154,   0.707585, -0.866679, -1.17947,
-             0.768982,    0.100597, -0.430972, -0.892625,
-             0.00537586, -0.309269,  0.170888,  0.295601;
+    res_L << -0.203861,   0.124992,  -0.579973,  -0.244055,
+              0.142937,  -0.0876381,  0.406646,   0.171118,
+             -0.0261578,  0.016038,  -0.0744172, -0.0313151,
+              0.0362046, -0.0221979,  0.103,      0.0433428;
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
