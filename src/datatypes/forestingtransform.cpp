@@ -27,21 +27,14 @@ ForestingTransform::~ForestingTransform()
 }
 
 
-void ForestingTransform::run(Image<int> &markers, float plato)
+void ForestingTransform::run(Image<int> &markers)
 {
     if (markers.getWidth() != w || markers.getHeight() != h)
         throw std::invalid_argument("Marker image and original must have same dimensions");
 
     reset();
 
-    for (int p = 0; p < w * h; p++) {
-        if (markers(p) >= 0) {
-            cost(p) = plato;
-            root(p) = p;
-            label(p) = markers(p);
-            heap.insert(p);
-        }
-    }
+    init(markers);
 
     int count = 0;
     while(!heap.isEmpty())
@@ -57,7 +50,7 @@ void ForestingTransform::run(Image<int> &markers, float plato)
             cost(p) = 0;
         }
 
-        updatePath();
+        updatePath(p);
 
         Pixel pix = coord(p);
         // adjacency with radius 1
@@ -162,6 +155,28 @@ Image<int> ForestingTransform::getLeafPredCount() const
 }
 
 
+void ForestingTransform::trim(int index)
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before pruning trees");
+
+    const int r = root(index);
+    const int o = order(index);
+
+    for (int p = 0; p < h * w; p++) {
+        if (r == root(p) && o >= order(p)) {
+            label(p) = nil;
+        }
+    }
+}
+
+
+void ForestingTransform::trim(int x, int y)
+{
+    trim(index(x, y));
+}
+
+
 void ForestingTransform::reset()
 {
     heap.reset();
@@ -175,4 +190,17 @@ void ForestingTransform::reset()
     }
 
     heap.setValues(cost.getFeats());
+}
+
+
+void ForestingTransform::init(const Image<int> &markers)
+{
+    for (int p = 0; p < w * h; p++) {
+        if (markers(p) >= 0) {
+            cost(p) = 0;
+            root(p) = p;
+            label(p) = markers(p);
+            heap.insert(p);
+        }
+    }
 }

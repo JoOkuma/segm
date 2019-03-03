@@ -14,9 +14,9 @@ namespace segm
         ForestingTransform(int width, int height, int bands, const float *feats);
         explicit ForestingTransform(const Image<float> &image) :
                 ForestingTransform(image.getWidth(), image.getHeight(), image.getBands(), image.getFeats()) { }
-        ~ForestingTransform() override;
+        ~ForestingTransform();
 
-        void run(Image<int> &markers, float plato = 0.01f);
+        void run(Image<int> &markers);
 
         Image<float> getCost() const;
         Image<int> getRoot() const;
@@ -27,8 +27,21 @@ namespace segm
         Image<int> getPredCount() const;
         Image<int> getLeafPredCount() const;
 
+        void trim(int index);
+        void trim(int x, int y);
+
+    public:
+
+        static const int nil = -1;
+
     protected:
-        const int nil = -1;
+
+        virtual void reset();
+        virtual void init(const Image<int> &markers);
+        virtual void updatePath(int) { };
+        virtual void conquer(int x, int y, int adj_x, int adj_y) = 0;
+
+    protected:
 
         Heap heap;
         Image<float> cost;
@@ -39,10 +52,6 @@ namespace segm
 
         bool executed = false;
 
-    private:
-        virtual void reset();
-        virtual void updatePath() { };
-        virtual void conquer(int x, int y, int adj_x, int adj_y) = 0;
     };
 }
 

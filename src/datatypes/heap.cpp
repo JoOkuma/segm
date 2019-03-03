@@ -27,28 +27,10 @@ Heap::Heap(int width, int height)
         row[i] = r;
 }
 
-Heap::Heap(int width, int height, float *pathval)
+Heap::Heap(int width, int height, float *pathval) :
+        Heap(width, height)
 {
-    size = width * height;
-    w = width;
-    h = height;
     value = pathval;
-    color = new heap_color[size];
-    node = new int[size];
-    pos = new int[size];
-    last = -1;
-    policy = min_value;
-    row = new int[h];
-
-    for (int i = 0; i < size; i++) {
-        color[i] = white;
-        pos[i] = -1;
-        node[i] = -1;
-    }
-
-    for (int i = 0, r = 0; i < h; i++, r += width)
-        row[i] = r;
-
 }
 
 Heap::~Heap()

@@ -36,7 +36,7 @@ namespace segm {
         Image(int width, int height, T *_feat, bool alloc = true);
         Image(const Image<T> &image);
 
-        virtual ~Image();
+        ~Image();
 
         int getHeight() const { return h; }
 
@@ -44,15 +44,13 @@ namespace segm {
 
         int getBands() const { return b; }
 
-        T *getFeats(int x, int y) const { return &feat[row[y] + col[x]]; }
+        T *getFeats(int x, int y) const { return &feat[row[y] + pos[x]]; }
 
-        T *getFeats(int p) const { return &feat[p]; }
+        T *getFeats(int p) const { return &feat[pos[p]]; }
 
         T *getFeats() const { return feat; }
 
         void setFeats(const T *array);
-
-        T squaredl2norm(int x1, int y1, int x2, int y2);
 
         Pixel coord(int p) {
             return Pixel{.x = p % w, .y = p / w};
@@ -64,8 +62,8 @@ namespace segm {
 
         Image<T> &operator=(const Image<T> &image);
 
-        T &operator()(int x, int y, int b) { return feat[row[y] + col[x] + b]; }
-        T operator()(int x, int y, int b) const { return feat[row[y] + col[x] + b]; }
+        T &operator()(int x, int y, int b) { return feat[row[y] + pos[x] + b]; }
+        T operator()(int x, int y, int b) const { return feat[row[y] + pos[x] + b]; }
 
         /* only for 1 band images */
         T &operator()(int x, int y) { return feat[row[y] + x]; }
@@ -103,7 +101,7 @@ namespace segm {
 
         /* lookup table */
         int *row = nullptr; /* w plus band length padding */
-        int *col = nullptr; /* band padding only */
+        int *pos = nullptr; /* band padding only */
         int *row_index = nullptr; /* w padding only */
 
         bool allocated = true; /* option to not alloc features, just point to it */
@@ -119,13 +117,13 @@ namespace segm {
         feat = new T[w * h * b]();
         row = new int[h];
         row_index = new int[h];
-        col = new int[w];
+        pos = new int[w * h];
         for (int i = 0, r = 0; i < h; i++, r += w) {
             row[i] = r * b;
             row_index[i] = r;
         }
-        for (int i = 0, c = 0; i < w; i++, c += b)
-            col[i] = c;
+        for (int i = 0, c = 0; i < w * h; i++, c += b)
+            pos[i] = c;
     }
 
     template<typename T>
@@ -138,14 +136,14 @@ namespace segm {
         feat = new T[w * h * b];
         row = new int[h];
         row_index = new int[h];
-        col = new int[w];
+        pos = new int[w * h];
         for (int i = 0, r = 0; i < h; i++, r += w) {
             row[i] = r * b;
             row_index[i] = r;
         }
 
-        for (int i = 0, c = 0; i < w; i++, c += b)
-            col[i] = c;
+        for (int i = 0, c = 0; i < w * h; i++, c += b)
+            pos[i] = c;
 
         setFeats(_feat);
     }
@@ -167,14 +165,14 @@ namespace segm {
 
         row = new int[h];
         row_index = new int[h];
-        col = new int[w];
+        pos = new int[w * h];
         for (int i = 0, r = 0; i < h; i++, r += w) {
             row[i] = r * b;
             row_index[i] = r;
         }
 
-        for (int i = 0, c = 0; i < w; i++, c += b)
-            col[i] = c;
+        for (int i = 0, c = 0; i < w * h; i++, c += b)
+            pos[i] = c;
     }
 
     template<typename T>
@@ -198,29 +196,15 @@ namespace segm {
         if (allocated)
             delete[] feat;
         delete[] row;
-        delete[] col;
+        delete[] pos;
         delete[] row_index;
     };
 
     template<typename T>
-    void Image<T>::setFeats(const T *_feat)
+    void Image<T>::setFeats(const T *array)
     {
         for (int i = 0; i < w * h * b; i++)
-            feat[i] = _feat[i];
-    }
-
-    template<typename T>
-    inline T Image<T>::squaredl2norm(int x1, int y1, int x2, int y2) {
-        T dist = 0;
-        T *v1 = getFeats(x1, y1);
-        T *v2 = getFeats(x2, y2);
-
-        for (int i = 0; i < b; i++) {
-            T diff = v1[i] - v2[i];
-            dist += diff * diff;
-        }
-
-        return dist;
+            feat[i] = array[i];
     }
 
     template<typename T>
@@ -232,7 +216,7 @@ namespace segm {
             if (allocated)
                 delete[] feat;
             delete[] row;
-            delete[] col;
+            delete[] pos;
             delete[] row_index;
 
             w = image.getWidth();
@@ -243,14 +227,14 @@ namespace segm {
             feat = new T[w * h * b];
             row = new int[h];
             row_index = new int[h];
-            col = new int[w];
+            pos = new int[w * h];
             for (int i = 0, r = 0; i < h; i++, r += w) {
                 row[i] = r * b;
                 row_index[i] = r;
             }
 
-            for (int i = 0, c = 0; i < w; i++, c += b)
-                col[i] = c;
+            for (int i = 0, c = 0; i < w * h; i++, c += b)
+                pos[i] = c;
         }
 
         setFeats(image.getFeats());

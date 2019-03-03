@@ -9,7 +9,7 @@ void WaterCut::conquer(int x, int y, int adj_x, int adj_y)
     {
         int p = index(x, y);
         int q = index(adj_x, adj_y);
-        float arc_weight = squaredl2norm(x, y, adj_x, adj_y);
+        float arc_weight = squaredl2norm(p, q);
         float tmp = max(arc_weight, cost(p));
         if (tmp < cost(q))
         {
