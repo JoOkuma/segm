@@ -10,6 +10,8 @@ add_executable(main_test
         metriclearn/largemargintest.h
         metriclearn/ncatest.cpp
         metriclearn/ncatest.h
+        segmentation/dyntreetest.cpp
+        segmentation/dyntreetest.h
         segmentation/watercuttest.cpp
         segmentation/watercuttest.h
         utils/colortest.cpp
