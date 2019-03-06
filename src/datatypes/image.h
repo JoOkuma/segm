@@ -104,7 +104,7 @@ namespace segm {
         int *pos = nullptr; /* band padding only */
         int *row_index = nullptr; /* w padding only */
 
-        bool allocated = true; /* option to not alloc features, just point to it */
+        bool allocated = false; /* option to not alloc features, just point to it */
     };
 
     template<typename T>
@@ -305,8 +305,9 @@ namespace segm {
     Image<U> Image<T>::convert() const
     {
         Image<U> out(w, h, b);
+        U *f = out.getFeats();
         for (int p = 0; p < w * h * b; p++) {
-            out(p) = (U) feat[p];
+            f[p] = (U) feat[p];
         }
 
         return out;
@@ -381,7 +382,7 @@ namespace segm {
                     dbl_feat[0] = feat[p] / normalization;
                     dbl_feat[1] = feat[p + 1] / normalization;
                     dbl_feat[2] = feat[p + 2] / normalization;
-                    convFun(dbl_feat, out.getFeats(p));
+                    convFun(dbl_feat, out.getFeats(i));
                     p += 3;
                     break;
             }
