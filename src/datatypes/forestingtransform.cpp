@@ -160,14 +160,41 @@ void ForestingTransform::trim(int index)
     if (!executed)
         throw std::runtime_error("IFT must be executed before pruning trees");
 
+    auto *float_order = new float[h * w];
+    auto *color = new int[h * w]();
+    Heap heap(w, h, float_order);
+
     const int r = root(index);
     const int o = order(index);
+    color[index] = 1; // marking the correct tree
 
     for (int p = 0; p < h * w; p++) {
-        if (r == root(p) && o >= order(p)) {
-            label(p) = nil;
+        if (root(p) == r && order(p) > o) {
+            float_order[p] = order(p);
+            heap.insert(p);
         }
     }
+
+    while (!heap.isEmpty())
+    {
+        int p = heap.pop();
+
+        if (pred(p) == nil)
+            continue;
+
+        if (color[pred(p)])
+        {
+            cost(p)  = std::numeric_limits<float>::max();
+            pred(p)  = nil;
+            root(p)  = nil;
+            label(p) = nil;
+            order(p) = nil;
+            color[p] = 1;
+        }
+    }
+
+    delete[] float_order;
+    delete[] color;
 }
 
 
