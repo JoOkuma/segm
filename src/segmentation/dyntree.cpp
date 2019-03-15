@@ -20,7 +20,7 @@ DynTree::DynTree(int width, int height, int bands, const float *feats) :
 DynTree::DynTree(const Image<float> &image) :
         ForestingTransform(image)
 {
-    sets = new DynSet * [image.getWidth() * image.getHeight()];
+    sets = new DynSet * [image.getWidth() * image.getHeight()]();
 }
 
 

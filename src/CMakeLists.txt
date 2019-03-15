@@ -13,6 +13,8 @@ set(SOURCE_FILES
         metriclearn/largemargin.h
         metriclearn/neighborcompanalysis.cpp
         metriclearn/neighborcompanalysis.h
+        segmentation/closestdyntree.cpp
+        segmentation/closestdyntree.h
         segmentation/dyntree.cpp
         segmentation/dyntree.h
         segmentation/watercut.cpp

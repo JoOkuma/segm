@@ -12,16 +12,15 @@ namespace segm
         DynTree(int width, int height, int bands);
         DynTree(int width, int height, int bands, const float *feats);
         explicit DynTree(const Image<float> &image);
-        ~DynTree();
+        ~DynTree() override;
 
-    private:
+    protected:
         struct DynSet {
             double *means;
             int size;
 
             explicit DynSet(int bands);
             ~DynSet();
-
         };
 
         DynSet **sets;
@@ -35,10 +34,10 @@ namespace segm
         void updatePath(int current) override;
         void conquer(int x, int y, int adj_x, int adj_y) override;
 
-    private:
-        void insert(DynSet *set, int p);
         double squaredDist(const DynSet *set, int p) const;
 
+    private:
+        void insert(DynSet *set, int p);
     };
 
 }

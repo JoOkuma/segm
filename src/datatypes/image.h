@@ -305,9 +305,8 @@ namespace segm {
     Image<U> Image<T>::convert() const
     {
         Image<U> out(w, h, b);
-        U *f = out.getFeats();
         for (int p = 0; p < w * h * b; p++) {
-            f[p] = (U) feat[p];
+            out(p) = static_cast<U>(feat[p]);
         }
 
         return out;
