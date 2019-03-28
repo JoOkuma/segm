@@ -27,10 +27,19 @@ Heap::Heap(int width, int height)
         row[i] = r;
 }
 
-Heap::Heap(int width, int height, float *pathval) :
+
+Heap::Heap(int size) :
+        Heap(size, 1) { };
+
+
+Heap::Heap(int size, float *cost) :
+        Heap(size, 1, cost) { };
+
+
+Heap::Heap(int width, int height, float *cost) :
         Heap(width, height)
 {
-    value = pathval;
+    value = cost;
 }
 
 Heap::~Heap()
@@ -41,10 +50,10 @@ Heap::~Heap()
     delete[] row;
 }
 
-void Heap::setValues(float *pathval)
+void Heap::setValues(float *cost)
 {
     reset();
-    value = pathval;
+    value = cost;
 }
 
 void Heap::insert(int p)
@@ -56,7 +65,7 @@ void Heap::insert(int p)
     node[last] = p;
     color[p] = gray;
     pos[p] = last;
-    goUp(last);
+    goUpPos(last);
 }
 
 int Heap::pop()
@@ -71,7 +80,7 @@ int Heap::pop()
     pos[node[0]] = 0;
     node[last] = -1;
     last--;
-    goDown(0);
+    goDownPos(0);
 
     return p;
 }
@@ -97,7 +106,7 @@ void Heap::remove(int x, int y)
     else
         value[p] = std::numeric_limits<float>::max();
 
-    goUp(pos[p]);
+    goUpPos(pos[p]);
     pop();
     value[p] = val;
     color[p] = white;
@@ -129,7 +138,7 @@ void Heap::swapUp(int &dad, int &son)
     dad = getDad(son);
 }
 
-void Heap::goUp(int position)
+void Heap::goUpPos(int position)
 {
     int dad = getDad(position);
     int son = position;
@@ -144,7 +153,7 @@ void Heap::goUp(int position)
     }
 }
 
-void Heap::goDown(int position)
+void Heap::goDownPos(int position)
 {
     int dad = position;
     int left = leftSon(dad);
@@ -165,7 +174,7 @@ void Heap::goDown(int position)
         swap(node[dad], node[position]);
         pos[node[dad]] = dad;
         pos[node[position]] = position;
-        goDown(dad);
+        goDownPos(dad);
     }
 }
 

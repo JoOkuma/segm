@@ -1,10 +1,14 @@
 set(SOURCE_FILES
         datatypes/forestingtransform.cpp
         datatypes/forestingtransform.h
+        datatypes/graph.cpp
+        datatypes/graph.h
         datatypes/heap.cpp
         datatypes/heap.h
         datatypes/image.cpp
         datatypes/image.h
+        datatypes/optimumpathforest.cpp
+        datatypes/optimumpathforest.h
         imgproc/filter.cpp
         imgproc/filter.h
         math/statistics.cpp

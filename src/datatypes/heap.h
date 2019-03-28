@@ -20,11 +20,14 @@ namespace segm
             max_value
         };
 
+
         Heap(int width, int height);
-        Heap(int width, int height, float *pathval);
+        Heap(int width, int height, float *cost);
+        Heap(int size);
+        Heap(int size, float *cost);
         ~Heap();
 
-        void setValues(float *pathval);
+        void setValues(float *cost);
 
         bool isFull() { return (last == (size - 1)); }
         bool isEmpty() { return (last == -1); }
@@ -44,8 +47,10 @@ namespace segm
             return (is(row[y] + x, col));
         }
 
-        void goUp(int x, int y) { goUp(pos[row[y] + x]); }
-        void goDown(int x, int y) { goDown(pos[row[y] + x]); }
+        void goUp(int x, int y) { goUpPos(pos[row[y] + x]); }
+        void goDown(int x, int y) { goDownPos(pos[row[y] + x]); }
+        void goUp(int idx) { goUpPos(pos[idx]); }
+        void goDown(int idx) { goDownPos(pos[idx]); }
 
         void setPolicy(removal_policy _policy) { policy = _policy; }
 
@@ -58,8 +63,8 @@ namespace segm
         void swap(int &i, int &j);
         void swapUp(int &dad, int &son);
 
-        void goUp(int position);
-        void goDown(int position);
+        void goUpPos(int position);
+        void goDownPos(int position);
 
         int size;
         int w;

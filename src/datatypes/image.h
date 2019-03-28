@@ -18,7 +18,7 @@ namespace segm {
             int y;
         } Pixel;
 
-        typedef enum : int {
+        typedef enum : unsigned int {
             rgb = 0x00,
             xyz = 0x01,
             lab = 0x02,
@@ -36,11 +36,13 @@ namespace segm {
         Image(int width, int height, T *_feat, bool alloc = true);
         Image(const Image<T> &image);
 
-        ~Image();
+        virtual ~Image();
 
         int getHeight() const { return h; }
 
         int getWidth() const { return w; }
+
+        int getSize() const { return w * h; }
 
         int getBands() const { return b; }
 
@@ -52,7 +54,7 @@ namespace segm {
 
         void setFeats(const T *array);
 
-        Pixel coord(int p) {
+        Pixel coord(int p) const {
             return Pixel{.x = p % w, .y = p / w};
         }
 

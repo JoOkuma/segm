@@ -14,7 +14,7 @@ namespace segm
         ForestingTransform(int width, int height, int bands, const float *feats);
         explicit ForestingTransform(const Image<float> &image) :
                 ForestingTransform(image.getWidth(), image.getHeight(), image.getBands(), image.getFeats()) { }
-        virtual ~ForestingTransform();
+        ~ForestingTransform() override = default;
 
         void run(Image<int> &markers);
 

@@ -13,17 +13,15 @@ ForestingTransform::ForestingTransform(int width, int height, int bands) :
         root(width, height),
         pred(width, height),
         label(width, height),
-        order(width, height) { }
+        order(width, height)
+{
+    heap.setValues(cost.getFeats());
+}
 
 
 ForestingTransform::ForestingTransform(int width, int height, int bands, const float *feats) :
         ForestingTransform(width, height, bands) {
     setFeats(feats);
-}
-
-
-ForestingTransform::~ForestingTransform()
-{
 }
 
 
@@ -215,8 +213,6 @@ void ForestingTransform::reset()
         label(p) = nil;
         order(p) = nil;
     }
-
-    heap.setValues(cost.getFeats());
 }
 
 
