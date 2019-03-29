@@ -13,10 +13,11 @@ namespace segm {
 
     public:
 
-        typedef struct {
+        struct Pixel {
             int x;
             int y;
-        } Pixel;
+            Pixel(int _x, int _y) : x(_x), y(_y) { }
+        };
 
         typedef enum : unsigned int {
             rgb = 0x00,
@@ -55,7 +56,7 @@ namespace segm {
         void setFeats(const T *array);
 
         Pixel coord(int p) const {
-            return Pixel{.x = p % w, .y = p / w};
+            return Pixel(p % w, p / w);
         }
 
         int index(int x, int y) const { return row_index[y] + x; }
@@ -66,15 +67,20 @@ namespace segm {
 
         T &operator()(int x, int y, int b) { return feat[row[y] + pos[x] + b]; }
         T operator()(int x, int y, int b) const { return feat[row[y] + pos[x] + b]; }
+        T &operator()(const Pixel &p, int b) { return (*this)(p.x, p.y, b); }
+        T operator()(const Pixel &p, int b) const { return (*this)(p.x, p.y, b); }
 
         /* only for 1 band images */
         T &operator()(int x, int y) { return feat[row[y] + x]; }
         T operator()(int x, int y) const { return feat[row[y] + x]; }
+        T &operator()(const Pixel &p) { return T (*this)(p.x, p.y); }
+        T operator()(const Pixel &p) const { return T (*this)(p.x, p.y); }
 
         T &operator()(int p) { return feat[p]; }
         T operator()(int p) const { return feat[p]; }
 
         inline bool valid(int x, int y) const { return ((x >= 0 && x < w) && (y >= 0 && y < h)); }
+        inline bool valid(const Pixel &p) const { return valid(p.x, p.y); }
 
         Image<T> copy() const;
 		void fill(T value);
@@ -414,7 +420,7 @@ namespace segm {
 
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
-                    out(i, j, bb) = (U) (((*this)(i, j, bb) - min) / max);
+                    out(i, j, bb) = static_cast<U>((((*this)(i, j, bb) - min) / max));
                 }
             }
         }

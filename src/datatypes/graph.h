@@ -34,6 +34,9 @@ namespace segm {
 
         void addEdge(int current, int neighbor, T weight = 0);
 
+        Node &node(int index) { return nodes[index]; }
+        Node node(int index) const { return nodes[index]; };
+
     protected:
         int size;
         int dimensions;
