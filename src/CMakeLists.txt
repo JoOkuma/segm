@@ -25,6 +25,8 @@ set(SOURCE_FILES
         segmentation/watercut.h
         segmentation/isf.cpp
         segmentation/isf.h
+        utils/algorithm.cpp
+        utils/algorithm.h
         utils/color.cpp
         utils/color.h)
 

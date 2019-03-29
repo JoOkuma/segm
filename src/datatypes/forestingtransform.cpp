@@ -109,16 +109,14 @@ Image<int> ForestingTransform::getBorder() const
 
     Image<int> border(w, h);
 
-    for (int i = 1; i < (w - 1); i++) {
-        for (int j = 1; j < (h - 1); j++)
-        {
-            int lb = label(i, j);
-            if (lb != label(i + 1, j + 1) || lb != label(i - 1, j + 1) ||
-                lb != label(i - 1, j - 1) || lb != label(i + 1, j - 1) ||
-                lb != label(i + 1, j) || lb != label(i, j + 1) ||
-                lb != label(i - 1, j) || lb != label(i, j - 1))
-            {
-                border(i, j) = 1;
+    for (int y = 1; y < (h - 1); y++) {
+        for (int x = 1; x < (w - 1); x++) {
+            int lb = label(x, y);
+            if (lb != label(x + 1, y + 1) || lb != label(x - 1, y + 1) ||
+                lb != label(x - 1, y - 1) || lb != label(x + 1, y - 1) ||
+                lb != label(x + 1, y) || lb != label(x, y + 1) ||
+                lb != label(x - 1, y) || lb != label(x, y - 1)) {
+                border(x, y) = 1;
             }
         }
     }

@@ -52,8 +52,8 @@ Filter Filter::gaussian(int size, float sigma)
     const float var = 2.0f * sigma * sigma;
 
     float sum = 0;
-    for (int i = 0; i < filter.w; i++) {
-        for (int j = 0; j < filter.h; j++) {
+    for (int j = 0; j < filter.h; j++) {
+        for (int i = 0; i < filter.w; i++) {
             int x = filter.shift_w[i];
             int y = filter.shift_h[j];
             float w = expf(-(x * x + y * y) / var);
@@ -81,8 +81,8 @@ Image<float> Filter::convolve(Image<float> &image, Filter &filter)
     #ifdef _OPENMP
         #pragma omp parallel for
     #endif
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
             for (int b = 0; b < bands; b++) {
                 int b_row = (b % filter.b) * filter.h * filter.w;
                 int f = 0;

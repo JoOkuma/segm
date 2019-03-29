@@ -4,7 +4,6 @@
 
 #include <eigen3/Eigen/Dense>
 
-#include <cmath>
 #include <queue>
 
 using namespace segm;
@@ -78,8 +77,8 @@ Image<int> ISF::computeCentroids()
     /* 0 = x-axis, 1 = y-axis, 2 = count */
     Eigen::MatrixXi centroids = Eigen::MatrixXi::Constant(n_sup, 3, 0);
 
-    for (int x = 0; x < w; x++) {
-        for (int y = 0; y < h; y++) {
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
             int lb = label(x, y);
             centroids(lb, 0) += x;
             centroids(lb, 1) += y;
