@@ -252,8 +252,7 @@ namespace segm {
 
     template<typename T>
     Image<T> Image<T>::copy() const {
-        Image<T> out(w, h, b);
-        out.setFeats(feat);
+        Image<T> out(w, h, b, feat);
         return out;
     }
 

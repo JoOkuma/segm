@@ -102,6 +102,31 @@ Image<int> ForestingTransform::getOrder() const
 }
 
 
+Image<int> ForestingTransform::getBorder() const
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before getting border");
+
+    Image<int> border(w, h);
+
+    for (int i = 1; i < (w - 1); i++) {
+        for (int j = 1; j < (h - 1); j++)
+        {
+            int lb = label(i, j);
+            if (lb != label(i + 1, j + 1) || lb != label(i - 1, j + 1) ||
+                lb != label(i - 1, j - 1) || lb != label(i + 1, j - 1) ||
+                lb != label(i + 1, j) || lb != label(i, j + 1) ||
+                lb != label(i - 1, j) || lb != label(i, j - 1))
+            {
+                border(i, j) = 1;
+            }
+        }
+    }
+
+    return border;
+}
+
+
 Image<int> ForestingTransform::getPredCount() const
 {
     if (!executed)

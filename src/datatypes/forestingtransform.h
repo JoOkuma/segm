@@ -23,6 +23,7 @@ namespace segm
         Image<int> getPred() const;
         Image<int> getLabel() const;
         Image<int> getOrder() const;
+        Image<int> getBorder() const;
 
         Image<int> getPredCount() const;
         Image<int> getLeafPredCount() const;
