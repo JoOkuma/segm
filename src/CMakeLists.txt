@@ -23,6 +23,8 @@ set(SOURCE_FILES
         segmentation/dyntree.h
         segmentation/watercut.cpp
         segmentation/watercut.h
+        segmentation/isf.cpp
+        segmentation/isf.h
         utils/color.cpp
         utils/color.h)
 
