@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "forestingtransform.h"
+#include "utils/algorithm.h"
 
 using namespace segm;
 
@@ -174,13 +175,15 @@ Image<int> ForestingTransform::getPredCount() const
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting predecessors count");
 
-    // TODO
-    //  - faster implementation (worst case of this is O(n^2)
+    std::vector<int> order_vec(static_cast<size_t >(w * h));
+    order_vec.assign(order.getFeats(), order.getFeats() + w * h);
+    std::vector<int> index = indexesDecreasing(order_vec);
+
     Image<int> count(w, h);
-    for (int p = 0; p < w * h; p++) {
-        for (int q = p; pred(q) != nil; q = pred(q)) {
-            count(pred(q)) += 1;
-        }
+    for (int i = 0; i < w * h; i++) {
+        int p = index[i];
+        if (pred(p) != nil)
+            count(pred(p)) += count(p) + 1;
     }
 
     return count;
@@ -192,28 +195,28 @@ Image<int> ForestingTransform::getLeafPredCount() const
     if (!executed)
         throw std::runtime_error("IFT must be executed before getting predecessors count");
 
-    Image<bool> control(w, h);
+    Image<bool> leafs(w, h);
 
     for (int p = 0; p < w * h; p++) {
-        control(p) = true;
+        leafs(p) = true;
     }
 
     // selecting leafs
     for (int p = 0; p < w * h; p++) {
         if (pred(p) != nil) {
-            control(pred(p)) = false;
+            leafs(pred(p)) = false;
         }
     }
 
-    // TODO
-    //  - faster implementation (worst case of this is O(n^2)
+    std::vector<int> order_vec(static_cast<size_t >(w * h));
+    order_vec.assign(order.getFeats(), order.getFeats() + w * h);
+    std::vector<int> index = indexesDecreasing(order_vec);
+
     Image<int> count(w, h);
-    for (int p = 0; p < w * h; p++) {
-        if (control(p)) {
-            for (int q = p; pred(q) != nil; q = pred(q)) {
-                count(pred(q)) += 1;
-            }
-        }
+    for (int i = 0; i < w * h; i++) {
+        int p = index[i];
+        if (pred(p) != nil)
+            count(pred(p)) += count(p) + leafs(p);
     }
 
     return count;
@@ -225,41 +228,26 @@ void ForestingTransform::trim(int index)
     if (!executed)
         throw std::runtime_error("IFT must be executed before pruning trees");
 
-    auto *float_order = new float[h * w];
-    auto *color = new int[h * w]();
-    Heap heap(w, h, float_order);
 
-    const int r = root(index);
-    const int o = order(index);
-    color[index] = 1; // marking the correct tree
+    std::vector<int> order_vec(static_cast<size_t >(w * h));
+    order_vec.assign(order.getFeats(), order.getFeats() + w * h);
+    std::vector<int> index_vec = indexesDecreasing(order_vec);
 
-    for (int p = 0; p < h * w; p++) {
-        if (root(p) == r && order(p) > o) {
-            float_order[p] = order(p);
-            heap.insert(p);
-        }
-    }
+    Image<bool> color(w, h);
+    color(index) = true;
 
-    while (!heap.isEmpty())
-    {
-        int p = heap.pop();
-
-        if (pred(p) == nil)
-            continue;
-
-        if (color[pred(p)])
+    for (int i = 0; i < h * w; i++) {
+        int p = index_vec[i];
+        if (pred(p) != nil && color(pred(p)))
         {
-            cost(p)  = std::numeric_limits<float>::max();
+            cost(p)  = 0;
             pred(p)  = nil;
             root(p)  = nil;
             label(p) = nil;
             order(p) = nil;
-            color[p] = 1;
+            color(p) = true;
         }
     }
-
-    delete[] float_order;
-    delete[] color;
 }
 
 
