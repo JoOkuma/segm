@@ -30,6 +30,9 @@ namespace segm
         Image<int> getPredCount() const;
         Image<int> getLeafPredCount() const;
 
+        Image<bool> getBranch(int index);
+        Image<bool> getBranch(int x, int y);
+
         bool getExecuted() const { return executed; }
 
         void trim(int index);

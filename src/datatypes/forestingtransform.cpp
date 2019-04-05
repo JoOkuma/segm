@@ -223,15 +223,43 @@ Image<int> ForestingTransform::getLeafPredCount() const
 }
 
 
+Image<bool> ForestingTransform::getBranch(int index)
+{
+    if (!executed)
+        throw std::runtime_error("IFT must be executed before getting tree branch.");
+
+    std::vector<int> order_vec(static_cast<size_t >(w * h));
+    order_vec.assign(order.getFeats(), order.getFeats() + w * h);
+    std::vector<int> index_vec = indexesIncreasing(order_vec);
+
+    Image<bool> color(w, h);
+    color(index) = true;
+
+    for (int i = 0; i < h * w; i++) {
+        int p = index_vec[i];
+        if (pred(p) != nil && color(pred(p)))
+            color(p) = true;
+    }
+    
+    color(index) = false;
+    return color;
+}
+
+
+Image<bool> ForestingTransform::getBranch(int x, int y)
+{
+    return getBranch(index(x, y));
+}
+
+
 void ForestingTransform::trim(int index)
 {
     if (!executed)
         throw std::runtime_error("IFT must be executed before pruning trees");
 
-
     std::vector<int> order_vec(static_cast<size_t >(w * h));
     order_vec.assign(order.getFeats(), order.getFeats() + w * h);
-    std::vector<int> index_vec = indexesDecreasing(order_vec);
+    std::vector<int> index_vec = indexesIncreasing(order_vec);
 
     Image<bool> color(w, h);
     color(index) = true;
