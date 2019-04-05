@@ -19,6 +19,8 @@ set(SOURCE_FILES
         metriclearn/neighborcompanalysis.h
         segmentation/closestdyntree.cpp
         segmentation/closestdyntree.h
+        segmentation/dtisf.cpp
+        segmentation/dtisf.h
         segmentation/dyntree.cpp
         segmentation/dyntree.h
         segmentation/watercut.cpp
