@@ -8,7 +8,7 @@
 
 namespace segm {
 
-    class ISF : public ForestingTransform 
+    class ISF : public virtual ForestingTransform
     {
 
     public:
@@ -19,10 +19,18 @@ namespace segm {
         explicit ISF(const Image<float> &image, float _alpha = 5.0f, float _beta = 12.0f) :
                 ForestingTransform(image), alpha(_alpha), beta(_beta) { }
 
+        ISF &operator=(const ISF &isf);
+
         void run(int n_superpixels, int iterations = 5);
 
-    private:
+        float getAlpha() const { return alpha; }
+        float getBeta() const { return beta; }
 
+    protected:
+        virtual Image<int> sample(int sample_size); /* default is grid sample */
+        virtual Image<int> computeCentroids(); /* default is geodesic center */
+
+    private:
         void conquer(int x, int y, int adj_x, int adj_y) override;
 
         inline float l2norm(int p, int q) const
@@ -39,12 +47,9 @@ namespace segm {
             return sqrtf(dist);
         }
 
-        virtual Image<int> sample(int sample_size); /* default is grid sample */
-        virtual Image<int> computeCentroids(); /* default is geodesic center */
         Pixel findNearest(int x, int y, int _label);
 
-    private:
-
+    protected:
         float alpha;
         float beta;
 

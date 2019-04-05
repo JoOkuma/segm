@@ -9,6 +9,15 @@
 using namespace segm;
 
 
+ISF &ISF::operator=(const ISF &isf)
+{
+    ForestingTransform::operator=(isf);
+    alpha = isf.getAlpha();
+    beta = isf.getBeta();
+    return (*this);
+}
+
+
 void ISF::run(int n_superpixels, int iterations)
 {
     Image<int> markers(w, h);

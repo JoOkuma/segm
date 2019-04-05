@@ -8,6 +8,7 @@ namespace segm
 {
     class Heap
     {
+
     public:
         enum heap_color {
             white,
@@ -27,10 +28,17 @@ namespace segm
         Heap(int size, float *cost);
         ~Heap();
 
+        Heap &operator=(const Heap &heap);
+
+        int getSize() const { return size; }
+        int getWidth() const { return w; }
+        int getHeight() const { return h; }
+        float *getValues() const { return value; }
+
         void setValues(float *cost);
 
-        bool isFull() { return (last == (size - 1)); }
-        bool isEmpty() { return (last == -1); }
+        bool isFull() const { return (last == (size - 1)); }
+        bool isEmpty() const { return (last == -1); }
 
         void insert(int p);
         void insert(int x, int y) { insert(row[y] + x); }
@@ -55,7 +63,6 @@ namespace segm
         void setPolicy(removal_policy _policy) { policy = _policy; }
 
     private:
-
         inline int getDad(int pos) { return (pos - 1) / 2; }
         inline int leftSon(int pos) { return 2 * pos + 1; }
         inline int rightSon(int pos) { return 2 * pos + 2; }
@@ -66,6 +73,7 @@ namespace segm
         void goUpPos(int position);
         void goDownPos(int position);
 
+    private:
         int size;
         int w;
         int h;

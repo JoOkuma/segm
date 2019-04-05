@@ -6,7 +6,7 @@ using namespace segm;
 DynTree::DynTree(int width, int height, int bands) :
         ForestingTransform(width, height, bands)
 {
-    sets = new DynSet * [width * height];
+    sets = new DynSet * [width * height]();
 }
 
 
@@ -105,7 +105,7 @@ void DynTree::conquer(int x, int y, int adj_x, int adj_y)
     {
         int p = index(x, y);
         int q = index(adj_x, adj_y);
-        auto arc_weight = (float) squaredDist(sets[root(p)], q);
+        auto arc_weight = static_cast<float>( squaredDist(sets[root(p)], q) );
         float tmp = max(arc_weight, cost(p));
         if (tmp < cost(q))
         {

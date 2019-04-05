@@ -25,6 +25,50 @@ ForestingTransform::ForestingTransform(int width, int height, int bands, const f
 }
 
 
+ForestingTransform &ForestingTransform::operator=(const segm::ForestingTransform &forest)
+{
+    if (w != forest.getWidth() || h != forest.getHeight() || b != forest.getBands())
+    {
+        if (allocated)
+            delete[] feat;
+        delete[] row;
+        delete[] pos;
+        delete[] row_index;
+
+        w = forest.getWidth();
+        h = forest.getHeight();
+        b = forest.getBands();
+        allocated = true;
+
+        feat = new float[w * h * b];
+        row = new int[h];
+        row_index = new int[h];
+        pos = new int[w * h];
+        for (int i = 0, r = 0; i < h; i++, r += w) {
+            row[i] = r * b;
+            row_index[i] = r;
+        }
+
+        for (int i = 0, c = 0; i < w * h; i++, c += b)
+            pos[i] = c;
+
+        heap = Heap(w, h);
+        cost = Image<float>(w, h);
+        root = Image<int>(w, h);
+        pred = Image<int>(w, h);
+        label = Image<int>(w, h);
+        order = Image<int>(w, h);
+
+        executed = false;
+    }
+
+    setFeats(forest.getFeats());
+    heap.setValues(cost.getFeats());
+
+    return (*this);
+}
+
+
 void ForestingTransform::run(Image<int> &markers)
 {
     if (markers.getWidth() != w || markers.getHeight() != h)

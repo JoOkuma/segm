@@ -5,7 +5,7 @@
 
 namespace segm
 {
-    class DynTree : public ForestingTransform
+    class DynTree : public virtual ForestingTransform
     {
 
     public:
@@ -32,11 +32,11 @@ namespace segm
         void reset() override;
         void init(const Image<int> &markers) override;
         void updatePath(int current) override;
-        void conquer(int x, int y, int adj_x, int adj_y) override;
 
         double squaredDist(const DynSet *set, int p) const;
 
     private:
+        void conquer(int x, int y, int adj_x, int adj_y) override;
         void insert(DynSet *set, int p);
     };
 

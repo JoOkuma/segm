@@ -11,7 +11,8 @@ void isf_test()
                        255, 255, 255, 255, 127, 127, 127, 127 };
 
     segm::Image<float> original(8, 4, 1, array);
-    segm::ISF forest(original);
+    segm::ISF forest(1, 1, 1); //  testing copy assignment operator
+    forest = segm::ISF(original);
 
     forest.run(4, 2);
     segm::Image<int> label = forest.getLabel();

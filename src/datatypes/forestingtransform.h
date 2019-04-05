@@ -16,6 +16,8 @@ namespace segm
                 ForestingTransform(image.getWidth(), image.getHeight(), image.getBands(), image.getFeats()) { }
         ~ForestingTransform() override = default;
 
+        ForestingTransform &operator=(const ForestingTransform &forest);
+
         void run(Image<int> &markers);
 
         Image<float> getCost() const;

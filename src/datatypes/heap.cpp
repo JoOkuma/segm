@@ -50,6 +50,41 @@ Heap::~Heap()
     delete[] row;
 }
 
+Heap &Heap::operator=(const segm::Heap &heap)
+{
+    if (w != heap.getWidth() || h != heap.getHeight())
+    {
+        delete[] color;
+        delete[] node;
+        delete[] pos;
+        delete[] row;
+
+        w = heap.getWidth();
+        h = heap.getHeight();
+        size = w * h;
+        color = new heap_color[size];
+        node = new int[size];
+        pos = new int[size];
+        last = -1;
+        policy = min_value;
+        row = new int[h];
+
+        for (int i = 0; i < size; i++) {
+            color[i] = white;
+            pos[i] = -1;
+            node[i] = -1;
+        }
+
+        for (int i = 0, r = 0; i < h; i++, r += w)
+            row[i] = r;
+
+    }
+
+    setValues(heap.getValues());
+    return (*this);
+}
+
+
 void Heap::setValues(float *cost)
 {
     reset();

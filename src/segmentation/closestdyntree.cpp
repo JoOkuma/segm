@@ -5,14 +5,17 @@ using namespace segm;
 
 
 ClosestDynTree::ClosestDynTree(int width, int height, int bands) :
+        ForestingTransform(width, height, bands),
         DynTree(width, height, bands) { }
 
 
 ClosestDynTree::ClosestDynTree(int width, int height, int bands, const float *feats) :
+        ForestingTransform(width, height, bands, feats),
         DynTree(width, height, bands, feats) { }
 
 
 ClosestDynTree::ClosestDynTree(const Image<float> &image) :
+        ForestingTransform(image),
         DynTree(image) { }
 
 
