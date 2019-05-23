@@ -15,7 +15,7 @@ void pca_test()
 
     Eigen::MatrixXd pca = segm::PCA(input, 1);
 
-    double res_pca[2] = {0.445607, 0.895229};
+    double res_pca[2] = {0.4472136, 0.89442719};
 
     for (int i = 0; i < pca.cols(); i++) {
         ASSERT_THROW((fabs(pca(0, i) - res_pca[i]) < 1e-5))

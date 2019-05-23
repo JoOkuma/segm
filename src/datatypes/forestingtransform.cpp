@@ -87,11 +87,8 @@ void ForestingTransform::run(Image<int> &markers)
         order(p) = count;
         count++;
 
-        if (root(p) == p) {
-            // TODO
-            //  - verificar se isto não buga o heap (acredito que não, ele já saiu da fila)
+        if (root(p) == p)
             cost(p) = 0;
-        }
 
         updatePath(p);
 
