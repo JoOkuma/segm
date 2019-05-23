@@ -7,11 +7,19 @@
 
 #include "datatypes/image.h"
 
+#include <cmath>
+
 namespace segm {
 
     class Filter {
 
     public:
+
+        enum conduction_function {
+            exponential,
+            quadratic,
+        };
+
         Filter(int width, int height) : Filter(width, height, 1) { }
         Filter(int width, int height, int band);
         ~Filter();
@@ -25,6 +33,8 @@ namespace segm {
         float &operator()(int x, int y) { return feat[row[y] + x]; }
         float &operator()(int p) { return feat[p]; }
 
+        static Image<float> convolve(Image<float> &image, Filter &filter);
+
         /* filters */
 
         /**
@@ -35,7 +45,8 @@ namespace segm {
          */
         static Filter gaussian(int size, float sigma);
 
-        static Image<float> convolve(Image<float> &image, Filter &filter);
+        static Image<float> anisotropic(const Image<float> &image, conduction_function fun_type,
+                                        int iters = 50, float lambda = 0.1f, float kappa = 0.5f);
 
     protected:
         int h = 0; /* h */
@@ -51,6 +62,28 @@ namespace segm {
         int *shift_w = nullptr;
 
     private:
+
+        static inline double expConduc(const float *f1, const float *f2, int b, float kappa)
+        {
+            double dot_product = 0.0;
+            for (int i = 0; i < b; i++) {
+                double diff = f1[b] - f2[b];
+                dot_product += diff * diff;
+            }
+            return 1.0 / (1.0 + dot_product / (kappa * kappa));
+        }
+
+
+        static inline double quadConduct(const float *f1, const float *f2, int b, float kappa)
+        {
+            double dot_product = 0.0;
+            for (int i = 0; i < b; i++) {
+                double diff = f1[b] - f2[b];
+                dot_product += diff * diff;
+            }
+            return exp(-dot_product / (kappa * kappa));
+        }
+
 
     };
 }

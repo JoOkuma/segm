@@ -1,10 +1,8 @@
 #include "filter.h"
 
-#include <cmath>
-
-#include <iostream>
 
 using namespace segm;
+
 
 Filter::Filter(int width, int height, int band)
 {
@@ -45,30 +43,6 @@ Filter::~Filter()
     delete[] shift_h;
 }
 
-Filter Filter::gaussian(int size, float sigma)
-{
-    Filter filter(size, size, 1);
-
-    const float var = 2.0f * sigma * sigma;
-
-    float sum = 0;
-    for (int j = 0; j < filter.h; j++) {
-        for (int i = 0; i < filter.w; i++) {
-            int x = filter.shift_w[i];
-            int y = filter.shift_h[j];
-            float w = expf(-(x * x + y * y) / var);
-            filter(i, j) = w;
-            sum += w;
-        }
-    }
-
-    for (int i = 0; i < filter.w * filter.h; i++) {
-        filter.feat[i] /= sum;
-    }
-
-    return filter;
-}
-
 
 Image<float> Filter::convolve(Image<float> &image, Filter &filter)
 {
@@ -95,6 +69,100 @@ Image<float> Filter::convolve(Image<float> &image, Filter &filter)
                         }
                         f++;
                     }
+                }
+            }
+        }
+    }
+
+    return out;
+}
+
+
+Filter Filter::gaussian(int size, float sigma)
+{
+    Filter filter(size, size, 1);
+
+    const float var = 2.0f * sigma * sigma;
+
+    float sum = 0;
+    for (int j = 0; j < filter.h; j++) {
+        for (int i = 0; i < filter.w; i++) {
+            int x = filter.shift_w[i];
+            int y = filter.shift_h[j];
+            float w = expf(-(x * x + y * y) / var);
+            filter(i, j) = w;
+            sum += w;
+        }
+    }
+
+    for (int i = 0; i < filter.w * filter.h; i++) {
+        filter.feat[i] /= sum;
+    }
+
+    return filter;
+}
+
+
+Image<float> Filter::anisotropic(const Image<float> &image, conduction_function fun_type,
+                                 int iters, float lambda, float kappa)
+{
+    Image<float> out(image);
+    Image<float> update(image);
+
+    double (*cond_fun)(const float *, const float *, int, float) = nullptr;
+
+    switch (fun_type) {
+        case exponential:
+            cond_fun = &Filter::expConduc;
+            break;
+        case quadratic:
+            cond_fun = &Filter::quadConduct;
+            break;
+    }
+
+    #ifdef _OPENMP
+        #pragma omp parallel
+    #endif
+    for (int it = 0; it < iters; it++)
+    {
+        update.setFeats(out.getFeats());
+        #ifdef _OPENMP
+            #pragma omp for
+        #endif
+        for (int j = 0; j < out.getHeight(); j++) {
+            for (int i = 0; i < out.getWidth(); i++)
+            {
+                double coeff[4] = { };
+
+                if (out.valid(i + 1, j)) {
+                    coeff[0] = cond_fun(update.getFeats(i, j), update.getFeats(i + 1, j), out.getBands(), kappa);
+                }
+
+                if (out.valid(i, j + 1)) {
+                    coeff[1] = cond_fun(update.getFeats(i, j), update.getFeats(i, j + 1), out.getBands(), kappa);
+                }
+
+                if (out.valid(i - 1, j)) {
+                    coeff[2] = cond_fun(update.getFeats(i, j), update.getFeats(i - 1, j), out.getBands(), kappa);
+                }
+
+                if (out.valid(i, j - 1)) {
+                    coeff[3] = cond_fun(update.getFeats(i, j), update.getFeats(i, j - 1), out.getBands(), kappa);
+                }
+
+                for (int b = 0; b < out.getBands(); b++)
+                {
+                    if (coeff[0] > 0.0)
+                        out(i, j, b) += lambda * coeff[0] * (update(i + 1, j, b) - update(i, j, b));
+
+                    if (coeff[1] > 0.0)
+                        out(i, j, b) += lambda * coeff[1] * (update(i, j + 1, b) - update(i, j, b));
+
+                    if (coeff[2] > 0.0)
+                        out(i, j, b) += lambda * coeff[2] * (update(i - 1, j, b) - update(i, j, b));
+
+                    if (coeff[3] > 0.0)
+                        out(i, j, b) += lambda * coeff[3] * (update(i, j - 1, b) - update(i, j, b));
                 }
             }
         }
