@@ -103,7 +103,7 @@ Filter Filter::gaussian(int size, float sigma)
 }
 
 
-Image<float> Filter::anisotropic(const Image<float> &image, conduction_function fun_type,
+Image<float> Filter::anisotropic(const Image<float> &image, ConductionFunction fun_type,
                                  int iters, float lambda, float kappa)
 {
     Image<float> out(image);
@@ -118,6 +118,8 @@ Image<float> Filter::anisotropic(const Image<float> &image, conduction_function 
         case quadratic:
             cond_fun = &Filter::quadConduct;
             break;
+        default:
+            return out;
     }
 
     #ifdef _OPENMP
@@ -134,21 +136,17 @@ Image<float> Filter::anisotropic(const Image<float> &image, conduction_function 
             {
                 double coeff[4] = { };
 
-                if (out.valid(i + 1, j)) {
+                if (out.valid(i + 1, j))
                     coeff[0] = cond_fun(update.getFeats(i, j), update.getFeats(i + 1, j), out.getBands(), kappa);
-                }
 
-                if (out.valid(i, j + 1)) {
+                if (out.valid(i, j + 1))
                     coeff[1] = cond_fun(update.getFeats(i, j), update.getFeats(i, j + 1), out.getBands(), kappa);
-                }
 
-                if (out.valid(i - 1, j)) {
+                if (out.valid(i - 1, j))
                     coeff[2] = cond_fun(update.getFeats(i, j), update.getFeats(i - 1, j), out.getBands(), kappa);
-                }
 
-                if (out.valid(i, j - 1)) {
+                if (out.valid(i, j - 1))
                     coeff[3] = cond_fun(update.getFeats(i, j), update.getFeats(i, j - 1), out.getBands(), kappa);
-                }
 
                 for (int b = 0; b < out.getBands(); b++)
                 {

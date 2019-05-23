@@ -15,7 +15,7 @@ namespace segm {
 
     public:
 
-        enum conduction_function {
+        enum ConductionFunction {
             exponential,
             quadratic,
         };
@@ -45,7 +45,7 @@ namespace segm {
          */
         static Filter gaussian(int size, float sigma);
 
-        static Image<float> anisotropic(const Image<float> &image, conduction_function fun_type,
+        static Image<float> anisotropic(const Image<float> &image, ConductionFunction fun_type,
                                         int iters = 50, float lambda = 0.1f, float kappa = 0.5f);
 
     protected:

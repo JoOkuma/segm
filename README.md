@@ -20,3 +20,4 @@ Usage examples can be found on `test` directory.
 ## TODO
 
 * Fix src & test files for metric-learn algorithms.
+* Add tests to anisotropic filter.
