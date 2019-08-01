@@ -2,7 +2,7 @@
 #ifndef SEGM_NEIGHCOMPANALYSIS_H
 #define SEGM_NEIGHCOMPANALYSIS_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

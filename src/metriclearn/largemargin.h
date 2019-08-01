@@ -3,7 +3,7 @@
 #define SEGM_LARGEMARGIN_H
 
 #include <vector>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

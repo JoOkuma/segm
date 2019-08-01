@@ -2,7 +2,7 @@
 #ifndef SEGM_STATISTICS_H
 #define SEGM_STATISTICS_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

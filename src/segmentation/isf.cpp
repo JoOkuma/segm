@@ -2,7 +2,7 @@
 #include "datatypes/heap.h"
 #include "segmentation/isf.h"
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <queue>
 
